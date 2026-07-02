@@ -32,14 +32,22 @@ def test_three_laws_loaded(cur):
     assert {r[2] for r in rows} == {"법률", "시행령", "시행규칙"}
 
 
-def test_initial_load_semantics(cur):
-    """초기 적재: 열린 구간(valid_to NULL)만 존재, 현행 여부는 valid_from<=today."""
-    cur.execute("SELECT count(*) FROM law_articles WHERE valid_to IS NOT NULL")
-    assert cur.fetchone()[0] == 0
+def test_temporal_current_invariant(cur):
+    """불변식: is_current ⇔ 오늘이 유효구간 [valid_from, valid_to) 안.
+
+    (초기적재 직후엔 전부 열린 행이지만, 델타 반영 후엔 닫힌 이력 행이 정상 존재 —
+    승격 잡이 매일 이 동치를 유지한다.)
+    """
     cur.execute(
-        "SELECT count(*) FROM law_articles WHERE is_current AND valid_from > CURRENT_DATE"
+        """
+        SELECT count(*) FROM law_articles
+        WHERE is_current <> (
+          valid_from <= CURRENT_DATE
+          AND (valid_to IS NULL OR valid_to > CURRENT_DATE)
+        )
+        """
     )
-    assert cur.fetchone()[0] == 0, "미래 시행 조문이 현행으로 표시됨"
+    assert cur.fetchone()[0] == 0, "is_current 가 유효구간과 불일치 (승격 잡 누락?)"
 
 
 def test_content_hash_present(cur):
