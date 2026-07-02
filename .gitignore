@@ -23,3 +23,6 @@ env/
 Thumbs.db
 .idea/
 .vscode/
+
+# API sweep 진행 캐시/로그 (재생성 가능)
+**/data/ccct_*
