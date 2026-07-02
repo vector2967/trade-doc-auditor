@@ -1,0 +1,45 @@
+# 3-스토어: Postgres(시간버전 원장) / Qdrant(현행 인덱스) / Neo4j(그래프)
+# 실행: docker compose up -d   (환경변수는 .env 에서 로드)
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: tda_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-trade_doc}
+      POSTGRES_USER: ${POSTGRES_USER:-trade}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trade} -d ${POSTGRES_DB:-trade_doc}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  qdrant:
+    # 서버사이드 IDF(sparse bm25 modifier=idf) 필요 → 1.15.2+ 핀
+    image: qdrant/qdrant:v1.15.4
+    container_name: tda_qdrant
+    ports:
+      - "6333:6333"   # REST
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  neo4j:
+    image: neo4j:5
+    container_name: tda_neo4j
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-change_me}
+    ports:
+      - "7474:7474"   # HTTP browser
+      - "7687:7687"   # Bolt
+    volumes:
+      - neo4j_data:/data
+
+volumes:
+  pg_data:
+  qdrant_data:
+  neo4j_data:

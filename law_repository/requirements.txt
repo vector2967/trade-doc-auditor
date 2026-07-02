@@ -1,0 +1,11 @@
+# 루트 통합 의존성 (test/ 프로토타입과 별개)
+psycopg[binary]>=3.2
+qdrant-client>=1.12
+neo4j>=5.24
+FlagEmbedding>=1.3
+pandas>=2.2
+openpyxl>=3.1
+pydantic-settings>=2.5
+requests>=2.32
+xmltodict>=0.13
+pytest>=8.3

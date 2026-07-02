@@ -1,0 +1,26 @@
+"""bge-m3 dense 임베딩 (설계 §4.2 — 'Vector 검색 근거').
+
+모델 로드가 무거우므로 lazy 싱글턴. 인덱싱·검색(Phase 5) 양쪽이 이걸 공유해야
+같은 공간에서 비교된다.
+"""
+from __future__ import annotations
+
+import numpy as np
+
+_model = None
+
+
+def _get_model():
+    global _model
+    if _model is None:
+        import torch
+        from FlagEmbedding import BGEM3FlagModel
+
+        _model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=torch.cuda.is_available())
+    return _model
+
+
+def encode(texts: list[str], batch_size: int = 8) -> np.ndarray:
+    """(n, 1024) float32 dense 벡터."""
+    out = _get_model().encode(texts, batch_size=batch_size, max_length=8192)
+    return np.asarray(out["dense_vecs"], dtype="float32")

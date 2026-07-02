@@ -1,0 +1,25 @@
+# Markdown (planning/design/handoff docs — kept local, not committed)
+*.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# Data caches / large artifacts
+*.npy
+**/data/raw/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
