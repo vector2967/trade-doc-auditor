@@ -247,6 +247,14 @@ def verify(drv=None) -> None:
 
 
 def main(argv: list[str]) -> int:
+    # 리다이렉트 시 stdout/stderr 이 cp949 로 잡히는데 로그 메시지의 em-dash(—) 등은
+    # cp949 에 없어 print 가 UnicodeEncodeError 로 죽는다(쿼터 초과 안전중단 메시지 포함).
+    # 인코딩 실패를 치명적 크래시가 아니라 '?' 치환으로 흘려보낸다.
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(errors="replace")
+        except (AttributeError, ValueError):
+            pass
     limit = None
     if "--limit" in argv:
         limit = int(argv[argv.index("--limit") + 1])
