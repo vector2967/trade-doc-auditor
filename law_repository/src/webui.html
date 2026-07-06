@@ -96,7 +96,12 @@ document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
   b.classList.add('on'); $('p-' + b.dataset.p).classList.add('on');
 });
 const esc = s => (s ?? '').toString().replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// 공유 링크의 ?token= 을 기억해 모든 API 호출에 붙인다 (서버에 DEMO_TOKEN 설정 시)
+const _tk = new URLSearchParams(location.search).get('token');
+if (_tk) localStorage.setItem('demo_token', _tk);
 async function j(url) {
+  const tok = localStorage.getItem('demo_token');
+  if (tok) url += (url.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(tok);
   const r = await fetch(url);
   if (!r.ok) throw new Error((await r.json().catch(()=>({}))).detail || r.statusText);
   return r.json();

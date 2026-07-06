@@ -60,6 +60,24 @@ python -m src.webapp        # http://0.0.0.0:8010 — 팀원에게 내 IP 공유
   `netsh advfirewall firewall add rule name="lawrepo-demo" dir=in action=allow protocol=TCP localport=8010`
 - **인증이 없다. 사내망/같은 공유기 안에서만 쓰고 외부 인터넷에 노출하지 말 것.**
 
+## D. 상시 운영 — 서버리스 무료 조합 (노트북 안 켜둬도 됨)
+
+데이터를 무료 관리형 서비스에 올리고, 웹 데모는 HF Spaces, 매일 동기화는 GitHub Actions 가 한다:
+
+| 구성요소 | 서비스 (무료 티어) | 준비물 |
+|---|---|---|
+| Postgres | [Neon](https://neon.tech) | 프로젝트 생성 → 접속정보 |
+| Qdrant | [Qdrant Cloud](https://cloud.qdrant.io) | free cluster → URL + API key |
+| Neo4j | [Neo4j AuraDB](https://neo4j.com/cloud/aura) | free instance → URI + 비밀번호 |
+| 웹서버+임베딩 | [HF Spaces](https://huggingface.co) Docker | `deploy/hf_space/` 두 파일 업로드 |
+| 델타 동기화 | GitHub Actions | repo Secrets 등록 (자동, `.github/workflows/delta-sync.yml`) |
+
+순서:
+1. 위 3개 DB 계정 생성 → 접속정보를 `deploy/.env.cloud.example` 형식으로 정리
+2. 로컬에서 `.env` 를 클라우드 값으로 바꾸고 **초기 적재 1회** (위 B 의 migrate + ingest 4단계 그대로 — 대상만 클라우드로 바뀜)
+3. GitHub repo Settings → Actions Secrets 에 같은 키 등록 → 매일 09:00 KST 자동 동기화
+4. HF Space 생성 (`deploy/hf_space/README.md` 안내대로) → 팀원에게 `https://<space>/?token=<DEMO_TOKEN>` 공유
+
 ## 터미널 도구 (환경 구축한 사람용)
 
 ```bash

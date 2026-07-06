@@ -6,16 +6,20 @@ http://<호스트IP>:8010 을 열면 검색/품목요건/조문조회를 바로 
 실행: law_repository/ 에서  python -m src.webapp   [--port 8010]
 - 기동 시 bge-m3 를 미리 로딩(첫 검색 지연 제거).
 - 임베딩 encode 는 스레드 안전하지 않아 lock 으로 직렬화.
-- LAN 데모용이지 공개 서비스가 아님 — 인증 없음, 외부망에 노출 금지.
+- 포트는 --port 또는 PORT 환경변수 (HF Spaces 등 PaaS 는 PORT 로 지정).
+- 접근 보호: DEMO_TOKEN 환경변수를 설정하면 모든 /api 가 토큰을 요구한다.
+  팀원에겐 http://<주소>/?token=<값> 링크를 공유하면 UI 가 알아서 붙인다.
+  (LAN 데모는 비워도 되지만, 공개 인터넷에 올릴 땐 반드시 설정하거나 Space 를 private 으로.)
 """
 from __future__ import annotations
 
+import os
 import sys
 import threading
 from datetime import date, datetime
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
 from src import repository as repo
@@ -25,6 +29,18 @@ from src.db.qdrant import BM25_VECTOR, DENSE_VECTOR
 app = FastAPI(title="관세법령 저장소 데모")
 _encode_lock = threading.Lock()
 _INDEX_HTML = (Path(__file__).parent / "webui.html").read_text(encoding="utf-8")
+_DEMO_TOKEN = os.environ.get("DEMO_TOKEN", "")
+
+
+@app.middleware("http")
+async def _token_guard(request: Request, call_next):
+    if _DEMO_TOKEN and request.url.path.startswith("/api"):
+        supplied = request.query_params.get("token") or request.headers.get("x-demo-token")
+        if supplied != _DEMO_TOKEN:
+            from fastapi.responses import JSONResponse
+
+            return JSONResponse({"detail": "token 필요 (?token=... 링크로 접속)"}, status_code=401)
+    return await call_next(request)
 
 
 def _as_of(s: str | None) -> date | None:
@@ -101,7 +117,7 @@ def main() -> int:
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(errors="replace")
 
-    port = 8010
+    port = int(os.environ.get("PORT", "8010"))
     if "--port" in sys.argv:
         port = int(sys.argv[sys.argv.index("--port") + 1])
     print("[webapp] bge-m3 예열 중… (수십 초)")

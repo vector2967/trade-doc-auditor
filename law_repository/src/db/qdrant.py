@@ -25,7 +25,10 @@ _PAYLOAD_INDEXES: dict[str, models.PayloadSchemaType] = {
 
 
 def client() -> QdrantClient:
-    return QdrantClient(url=settings.qdrant_url)
+    return QdrantClient(
+        url=settings.qdrant_url,
+        api_key=settings.qdrant_api_key or None,  # Qdrant Cloud 인증 (로컬은 비움)
+    )
 
 
 def ensure_collection(qc: QdrantClient | None = None) -> None:

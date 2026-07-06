@@ -13,9 +13,11 @@ class Settings(BaseSettings):
     postgres_db: str = "trade_doc"
     postgres_user: str = "trade"
     postgres_password: str = "change_me"
+    postgres_sslmode: str = ""      # 관리형 PG(Neon 등)는 "require"
 
     # Qdrant
     qdrant_url: str = "http://localhost:6333"
+    qdrant_api_key: str = ""        # Qdrant Cloud 용 (로컬은 비움)
 
     # Neo4j
     neo4j_uri: str = "bolt://localhost:7687"
@@ -28,10 +30,11 @@ class Settings(BaseSettings):
 
     @property
     def postgres_dsn(self) -> str:
-        return (
+        dsn = (
             f"postgresql://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
+        return dsn + (f"?sslmode={self.postgres_sslmode}" if self.postgres_sslmode else "")
 
 
 settings = Settings()
