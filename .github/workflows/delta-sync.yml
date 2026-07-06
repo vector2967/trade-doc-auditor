@@ -1,0 +1,46 @@
+# 법령 델타 동기화 — 매일 1회, 노트북 없이 클라우드 DB(Neon/Qdrant Cloud/Aura)를 최신으로.
+# 필요한 Secrets (repo Settings > Secrets and variables > Actions):
+#   POSTGRES_HOST / POSTGRES_DB / POSTGRES_USER / POSTGRES_PASSWORD
+#   QDRANT_URL / QDRANT_API_KEY / NEO4J_URI / NEO4J_USER / NEO4J_PASSWORD / LAW_API_OC
+name: delta-sync
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # 매일 00:00 UTC = 09:00 KST
+  workflow_dispatch:        # 수동 실행 버튼
+
+jobs:
+  delta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: law_repository
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: law_repository/requirements.txt
+
+      - name: Install deps (CPU torch)
+        run: |
+          pip install --quiet torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --quiet -r requirements.txt
+
+      - name: Run delta sync (idempotent)
+        env:
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_SSLMODE: require
+          QDRANT_URL: ${{ secrets.QDRANT_URL }}
+          QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          LAW_API_OC: ${{ secrets.LAW_API_OC }}
+        run: python -m src.sync.delta
