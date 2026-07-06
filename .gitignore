@@ -26,3 +26,8 @@ Thumbs.db
 
 # API sweep 진행 캐시/로그 (재생성 가능)
 **/data/ccct_*
+# 단, 전수 스윕 결과는 커밋 (재수집에 쿼터 3일 — 팀원은 --load-only 로 즉시 적재)
+!law_repository/data/ccct_progress.jsonl
+
+# 팀원용 셋업 가이드는 커밋 (*.md 무시의 예외)
+!law_repository/README.md

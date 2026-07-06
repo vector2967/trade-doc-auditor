@@ -9,3 +9,5 @@ pydantic-settings>=2.5
 requests>=2.32
 xmltodict>=0.13
 pytest>=8.3
+fastapi>=0.115
+uvicorn>=0.30
