@@ -1,13 +1,16 @@
-# 법령 델타 동기화 — 매일 1회, 노트북 없이 클라우드 DB(Neon/Qdrant Cloud/Aura)를 최신으로.
+# 법령 델타 동기화 — 클라우드 DB(Neon/Qdrant Cloud/Aura) 갱신.
+# ⚠️ 2026-07-06 실측: 법제처(law.go.kr)가 GitHub 러너(해외 IP)의 접속을 차단해
+#    스케줄 실행이 항상 ConnectTimeout 으로 실패 → 크론 비활성화.
+#    정기 동기화는 한국 IP 인 호스트 PC 의 작업 스케줄러가 담당
+#    (law_repository/scripts/register_delta_task.ps1). 이 워크플로우는
+#    한국 리전 self-hosted 러너를 붙일 경우를 위해 수동 트리거만 남긴다.
 # 필요한 Secrets (repo Settings > Secrets and variables > Actions):
 #   POSTGRES_HOST / POSTGRES_DB / POSTGRES_USER / POSTGRES_PASSWORD
 #   QDRANT_URL / QDRANT_API_KEY / NEO4J_URI / NEO4J_USER / NEO4J_PASSWORD / LAW_API_OC
 name: delta-sync
 
 on:
-  schedule:
-    - cron: "0 0 * * *"   # 매일 00:00 UTC = 09:00 KST
-  workflow_dispatch:        # 수동 실행 버튼
+  workflow_dispatch:        # 수동 실행만 (크론은 위 사유로 비활성화)
 
 jobs:
   delta:

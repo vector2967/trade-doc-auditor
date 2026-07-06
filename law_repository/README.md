@@ -70,12 +70,14 @@ python -m src.webapp        # http://0.0.0.0:8010 — 팀원에게 내 IP 공유
 | Qdrant | [Qdrant Cloud](https://cloud.qdrant.io) | free cluster → URL + API key |
 | Neo4j | [Neo4j AuraDB](https://neo4j.com/cloud/aura) | free instance → URI + 비밀번호 |
 | 웹서버+임베딩 | [HF Spaces](https://huggingface.co) Docker | `deploy/hf_space/` 두 파일 업로드 |
-| 델타 동기화 | GitHub Actions | repo Secrets 등록 (자동, `.github/workflows/delta-sync.yml`) |
+| 델타 동기화 | 호스트 PC 작업 스케줄러 | `scripts/register_delta_task.ps1` 1회 실행 (아래 참고) |
 
 순서:
-1. 위 3개 DB 계정 생성 → 접속정보를 `deploy/.env.cloud.example` 형식으로 정리
+1. 위 3개 DB 계정 생성 → 접속정보를 `deploy/.env.cloud.example` 형식으로 `.env.cloud` 에 정리
 2. 로컬에서 `.env` 를 클라우드 값으로 바꾸고 **초기 적재 1회** (위 B 의 migrate + ingest 4단계 그대로 — 대상만 클라우드로 바뀜)
-3. GitHub repo Settings → Actions Secrets 에 같은 키 등록 → 매일 09:00 KST 자동 동기화
+3. **정기 동기화 등록**: `powershell -File scripts\register_delta_task.ps1` (관리자 불필요, 1회).
+   매일 09:30, PC 가 꺼져 있었으면 다음 부팅 때 밀린 만큼 따라잡는다 (`data/delta_cloud.log` 에 기록).
+   ⚠️ GitHub Actions 크론은 못 쓴다 — 법제처가 해외 IP(깃허브 러너)를 차단함 (2026-07-06 실측).
 4. HF Space 생성 (`deploy/hf_space/README.md` 안내대로) → 팀원에게 `https://<space>/?token=<DEMO_TOKEN>` 공유
 
 ## 터미널 도구 (환경 구축한 사람용)
