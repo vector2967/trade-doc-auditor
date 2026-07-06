@@ -28,6 +28,7 @@ def client() -> QdrantClient:
     return QdrantClient(
         url=settings.qdrant_url,
         api_key=settings.qdrant_api_key or None,  # Qdrant Cloud 인증 (로컬은 비움)
+        timeout=60,  # WAN 배치 업서트가 기본 5초를 초과 (Qdrant Cloud 실측)
     )
 
 

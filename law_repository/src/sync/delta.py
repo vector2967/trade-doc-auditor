@@ -250,6 +250,11 @@ def write_watermark(cur) -> None:
 
 
 def run(argv: list[str]) -> int:
+    # cp949 콘솔 유니코드 출력 크래시 방어 (ccct 988664b 와 동일)
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="replace")
+
     dry = "--dry-run" in argv
     since_arg = next((a.split("=", 1)[1] if "=" in a else argv[argv.index(a) + 1]
                       for a in argv if a.startswith("--since")), None)
