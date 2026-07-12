@@ -14,9 +14,10 @@ WORKDIR /app/repo/law_repository
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
  && pip install --no-cache-dir -r requirements.txt
 
-# bge-m3 를 이미지에 미리 다운로드 — 콜드스타트에서 모델 받는 시간 제거
+# bge-m3 + bge-reranker-v2-m3(A1 rerank) 를 이미지에 미리 다운로드 — 콜드스타트에서 모델 받는 시간 제거
 ENV HF_HOME=/app/hf_cache
 RUN python -c "from FlagEmbedding import BGEM3FlagModel; BGEM3FlagModel('BAAI/bge-m3', use_fp16=False)" \
+ && python -c "from FlagEmbedding import FlagReranker; FlagReranker('BAAI/bge-reranker-v2-m3', use_fp16=False)" \
  && chmod -R a+rwX /app/hf_cache
 
 # DB 접속정보(POSTGRES_*, QDRANT_*, NEO4J_*)와 DEMO_TOKEN 은

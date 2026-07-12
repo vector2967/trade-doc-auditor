@@ -22,6 +22,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
+from src import hybrid
 from src import repository as repo
 from src.cli import LAW_ALIAS, LAW_NAME, _parse_article_no
 from src.db.qdrant import BM25_VECTOR, DENSE_VECTOR
@@ -70,6 +71,17 @@ def api_search(q: str, limit: int = 5, as_of: str | None = None) -> dict:
                 for h in hits
             ]
     return out
+
+
+@app.get("/api/retrieve")
+def api_retrieve(q: str, limit: int = 5, as_of: str | None = None, rerank: bool = True) -> dict:
+    """A1 하이브리드 검색 — 에이전트(tool use)용 단일 랭킹 RagEvidence.
+
+    /api/search 는 arm 별 결과를 나란히 보여주는 데모/디버그용이고,
+    에이전트 연동은 이 엔드포인트를 쓴다 (docs/API계약_에이전트연동.md).
+    """
+    with _encode_lock:
+        return hybrid.retrieve(q, limit=min(limit, 10), as_of=_as_of(as_of), use_rerank=rerank)
 
 
 @app.get("/api/hsk")
@@ -121,9 +133,12 @@ def main() -> int:
     if "--port" in sys.argv:
         port = int(sys.argv[sys.argv.index("--port") + 1])
     print("[webapp] bge-m3 예열 중… (수십 초)")
-    from src.embed import dense
+    from src.embed import dense, rerank
 
     dense.encode(["예열"])
+    print("[webapp] reranker 예열 중… (최초 1회는 모델 다운로드 ≈2.3GB)")
+    if not rerank.available():
+        print("[webapp] reranker 불가 — /api/retrieve 는 RRF 순위로 동작 (reranked=false)")
     print(f"[webapp] 준비 완료 — 팀원 접속: http://<이 PC의 IP>:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")
     return 0
