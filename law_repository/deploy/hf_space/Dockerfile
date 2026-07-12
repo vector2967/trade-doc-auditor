@@ -7,7 +7,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-RUN git clone --depth 1 https://github.com/vector2967/trade-doc-auditor.git repo
+# CODE_REV: 코드 리비전 표시 겸 도커 캐시 무효화 — GitHub 에 새 코드를 push 하면
+# 이 값을 그 커밋 SHA 로 바꿔서 Space 에 올려야 clone 레이어가 다시 돈다.
+# --branch main 필수: GitHub 기본 브랜치(upset_vector_db)는 뒤처져 있음.
+ARG CODE_REV=b0a28ba
+RUN git clone --branch main --depth 1 https://github.com/vector2967/trade-doc-auditor.git repo
 WORKDIR /app/repo/law_repository
 
 # torch 는 CPU 휠로 (기본 인덱스는 CUDA 포함이라 이미지가 수 GB 커짐)
