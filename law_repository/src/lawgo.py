@@ -17,6 +17,7 @@ from __future__ import annotations
 import html
 import json
 import re
+import time
 from pathlib import Path
 
 import requests
@@ -70,18 +71,45 @@ def content_of(x) -> str:
 def get(endpoint: str, **params) -> dict:
     params.setdefault("OC", settings.law_api_oc)
     params.setdefault("type", "JSON")
-    r = _session.get(f"{BASE}/{endpoint}", params=params, timeout=60)
-    r.raise_for_status()
-    return _clean_keys(r.json())
+    # 다건 연속 호출 시 법제처가 간헐적으로 연결을 리셋함(2026-07-12 실측,
+    # 특수물자 55개 적재 중 ConnectionReset) — 지수 백오프로 재시도.
+    last_err: Exception | None = None
+    for attempt in range(4):
+        if attempt:
+            time.sleep(2 ** attempt)  # 2, 4, 8초
+        try:
+            r = _session.get(f"{BASE}/{endpoint}", params=params, timeout=60)
+            r.raise_for_status()
+            return _clean_keys(r.json())
+        except (requests.ConnectionError, requests.Timeout) as e:
+            last_err = e
+    raise last_err
 
 
 def fetch_current_law(law_id: str, use_cache: bool = True) -> dict:
-    """현행 법령 본문. target=law + ID(법령ID) — MST 하드코딩 없이 항상 현행."""
+    """'현행' 법령 본문. target=law + ID(법령ID).
+
+    ⚠️ 실측(2026-07-12): 공포됐지만 미시행인 개정이 있는 법령은 이 endpoint 가
+    **미래 시행 버전**을 반환한다(기본정보 시행일자가 미래). 그 경우 오늘 유효한
+    버전은 fetch_law_by_mst(resolve_effective_version(...)) 로 따로 가져와야 한다
+    — src.ingest.laws 의 backfill 참조.
+    """
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     cache = RAW_DIR / f"law_current_{law_id}.json"
     if use_cache and cache.exists():
         return json.loads(cache.read_text(encoding="utf-8"))
     body = get("lawService.do", target="law", ID=law_id)
+    cache.write_text(json.dumps(body, ensure_ascii=False, indent=2), encoding="utf-8")
+    return body
+
+
+def fetch_law_by_mst(mst: str, use_cache: bool = True) -> dict:
+    """특정 버전(MST=법령일련번호) 본문. 버전 고정이라 캐시 영구 유효."""
+    RAW_DIR.mkdir(parents=True, exist_ok=True)
+    cache = RAW_DIR / f"law_mst_{mst}.json"
+    if use_cache and cache.exists():
+        return json.loads(cache.read_text(encoding="utf-8"))
+    body = get("lawService.do", target="law", MST=mst)
     cache.write_text(json.dumps(body, ensure_ascii=False, indent=2), encoding="utf-8")
     return body
 

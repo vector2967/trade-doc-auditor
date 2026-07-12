@@ -24,7 +24,7 @@ from fastapi.responses import HTMLResponse
 
 from src import hybrid
 from src import repository as repo
-from src.cli import LAW_ALIAS, LAW_NAME, _parse_article_no
+from src.cli import LAW_ALIAS, _parse_article_no
 from src.db.qdrant import BM25_VECTOR, DENSE_VECTOR
 
 app = FastAPI(title="관세법령 저장소 데모")
@@ -89,11 +89,41 @@ def api_hsk(code: str, trade: str | None = None, as_of: str | None = None) -> di
     return repo.hsk_requirements(code, trade_type=trade or None, as_of=_as_of(as_of))
 
 
+_law_names: dict[str, str] = {}  # law_id → 법령명 (laws 테이블 캐시)
+
+
+def _load_law_names() -> dict[str, str]:
+    from src.db.postgres import connect
+
+    with connect() as conn, conn.cursor() as cur:
+        cur.execute("SELECT law_id, law_name FROM laws")
+        return dict(cur.fetchall())
+
+
+def _resolve_law(law: str) -> str | None:
+    """법/영/규칙 별칭, 법령ID, 법령명(공백 무시) → law_id. 미적재 법령이면 None."""
+    global _law_names
+    if not _law_names:
+        _law_names = _load_law_names()
+    lid = LAW_ALIAS.get(law, law)
+    if lid in _law_names:
+        return lid
+    squashed = law.replace(" ", "")
+    for law_id, name in _law_names.items():
+        if name.replace(" ", "") == squashed:
+            return law_id
+    # 캐시가 낡았을 수 있음(델타로 법령 추가) — 1회 갱신 후 재시도
+    _law_names = _load_law_names()
+    if lid in _law_names:
+        return lid
+    return next((i for i, n in _law_names.items() if n.replace(" ", "") == squashed), None)
+
+
 @app.get("/api/article")
 def api_article(law: str, no: str, as_of: str | None = None) -> dict:
-    law_id = LAW_ALIAS.get(law, law)
-    if law_id not in LAW_NAME:
-        raise HTTPException(400, "law 는 법/영/규칙 또는 법령ID")
+    law_id = _resolve_law(law)
+    if law_id is None:
+        raise HTTPException(400, "law 는 법/영/규칙 별칭, 법령ID, 또는 적재된 법령명")
     try:
         art_no = _parse_article_no(no)
     except ValueError:
@@ -104,14 +134,14 @@ def api_article(law: str, no: str, as_of: str | None = None) -> dict:
     edges = []
     for e in repo.expand_article(row["article_pk"]):
         t_no = e["article_no"]
-        label = (f"{LAW_NAME.get(e['law_id'], e['law_id'])} 제{t_no // 100}조"
+        label = (f"{_law_names.get(e['law_id'], e['law_id'])} 제{t_no // 100}조"
                  + (f"의{t_no % 100}" if t_no % 100 else "")) if t_no else (e["title"] or "")
         edges.append({"rel": e["rel"], "pk": e["article_pk"],
                       "label": label, "title": e["title"]})
     return {
         "found": True,
         "pk": row["article_pk"],
-        "law": LAW_NAME[law_id],
+        "law": _law_names[law_id],
         "title": row["title"],
         "valid_from": str(row["valid_from"]),
         "valid_to": str(row["valid_to"]) if row["valid_to"] else None,

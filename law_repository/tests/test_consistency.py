@@ -17,7 +17,7 @@ import pytest
 
 from src import repository as repo
 from src.db.qdrant import COLLECTION
-from src.ingest.graph import LAW_RANK
+from src.ingest.graph import HIER_RANK
 
 # 조문 identity (설계 §4.1 EXCLUDE 키와 동일)
 _KEY = "law_id, article_no, paragraph_no, item_no"
@@ -248,10 +248,11 @@ def test_graph_nodes_match_pg_current(pg, neo):
 
 
 def test_graph_edge_invariants(neo):
-    """self-loop 0 · CITES 동일법령 · DELEGATES 상위→하위(LAW_RANK) — 전 엣지."""
+    """self-loop 0 · CITES 동일법령 · DELEGATES 상위→하위(hierarchy) ·
+    REFERS_TO 는 타 법령 간 — 전 엣지 (2026-07-12 전 법령 일반화)."""
     with neo.session() as s:
         loops = s.run(
-            "MATCH (a:Article)-[r:CITES|DELEGATES]->(a) RETURN count(r) AS c"
+            "MATCH (a:Article)-[r:CITES|DELEGATES|REFERS_TO]->(a) RETURN count(r) AS c"
         ).single()["c"]
         assert loops == 0
 
@@ -259,15 +260,21 @@ def test_graph_edge_invariants(neo):
             "MATCH (s:Article)-[:CITES]->(t:Article) "
             "WHERE s.law_id <> t.law_id RETURN count(*) AS c"
         ).single()["c"]
-        assert bad_cites == 0, "CITES 가 법령 경계를 넘음 (DELEGATES 여야 함)"
+        assert bad_cites == 0, "CITES 가 법령 경계를 넘음 (DELEGATES/REFERS_TO 여야 함)"
+
+        bad_refers = s.run(
+            "MATCH (s:Article)-[:REFERS_TO]->(t:Article) "
+            "WHERE s.law_id = t.law_id RETURN count(*) AS c"
+        ).single()["c"]
+        assert bad_refers == 0, "REFERS_TO 가 동일 법령 내부에 있음 (CITES 여야 함)"
 
         pairs = list(s.run(
             "MATCH (s:Article)-[:DELEGATES]->(t:Article) "
-            "RETURN DISTINCT s.law_id AS s, t.law_id AS t"
+            "RETURN DISTINCT s.hierarchy AS sh, t.hierarchy AS th"
         ))
     for r in pairs:
-        assert LAW_RANK[r["s"]] < LAW_RANK[r["t"]], \
-            f"DELEGATES 방향 위반: {r['s']}(rank {LAW_RANK[r['s']]}) → {r['t']}"
+        assert HIER_RANK[r["sh"]] < HIER_RANK[r["th"]], \
+            f"DELEGATES 방향 위반: {r['sh']} → {r['th']}"
 
 
 # ------------------------------------------------- D. HSK 상속 누락 체크

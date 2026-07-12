@@ -66,7 +66,15 @@ def test_promote_flips_on_enforcement_day(cur):
     old_pk = _seed_current(cur)
     new_pk, _ = _reconcile_article(cur, LAW, "m2", _row("v2", date(2099, 1, 1)))
 
-    assert promote(cur, qc=None, as_of=date(2098, 12, 31)) == {"demoted": 0, "promoted": 0}
+    # 2098-12-31 시점엔 합성 조문이 아직 안 뒤집혀야 한다. (promote 전체 카운트 0
+    # 등식은 실데이터에 진짜 미래 preload 가 생긴 2026-07-12 부터 무효 — 합성 행만 검증.
+    # cur 픽스처가 롤백 격리하므로 실데이터 flip 도 커밋되지 않는다.)
+    promote(cur, qc=None, as_of=date(2098, 12, 31))
+    cur.execute("SELECT is_current FROM law_articles WHERE id=%s", (old_pk,))
+    assert cur.fetchone()[0] is True
+    cur.execute("SELECT is_current FROM law_articles WHERE id=%s", (new_pk,))
+    assert cur.fetchone()[0] is False
+
     stats = promote(cur, qc=None, as_of=date(2099, 1, 1))
     assert stats["demoted"] >= 1 and stats["promoted"] >= 1
     cur.execute("SELECT is_current FROM law_articles WHERE id=%s", (old_pk,))

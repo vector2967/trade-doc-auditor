@@ -25,11 +25,17 @@ def cur():
     conn.close()
 
 
-def test_three_laws_loaded(cur):
-    cur.execute("SELECT law_id, law_name, hierarchy FROM laws ORDER BY law_id")
+def test_target_laws_loaded(cur):
+    """laws 테이블 ⊇ TARGET_LAWS (관세 3법 + 특수물자 개별법령 55, 2026-07-12 확장)."""
+    from src.ingest.laws import TARGET_LAWS
+
+    cur.execute("SELECT law_id, law_name, hierarchy FROM laws")
     rows = cur.fetchall()
-    assert {r[1] for r in rows} == {"관세법", "관세법 시행령", "관세법 시행규칙"}
-    assert {r[2] for r in rows} == {"법률", "시행령", "시행규칙"}
+    loaded_ids = {r[0] for r in rows}
+    assert {t["law_id"] for t in TARGET_LAWS} <= loaded_ids
+    core = {r[1] for r in rows if r[0] in ("001556", "002421", "006392")}
+    assert core == {"관세법", "관세법 시행령", "관세법 시행규칙"}
+    assert {r[2] for r in rows} <= {"법률", "시행령", "시행규칙"}
 
 
 def test_temporal_current_invariant(cur):
