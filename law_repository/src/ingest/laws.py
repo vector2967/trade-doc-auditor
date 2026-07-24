@@ -327,18 +327,29 @@ def _insert_inforce_row(cur, law_id: str, mst: str, row: dict, default_valid_to:
     valid_to = (hit[0] if hit and hit[0] else default_valid_to)
     if valid_to <= row["valid_from"]:  # 방어: 구간이 비면 스킵
         return None, "unchanged"
-    # 멱등: 같은 구간 시작의 행이 이미 있으면 스킵
+    # 멱등 + 이력 존중: 후보 구간과 겹치는 행이 하나라도 있으면 삽입하지 않는다.
+    # (클라우드 DB엔 델타 잡/타 세션이 만든 다른 구간의 이력 행이 있을 수 있음 — EXCLUDE 위반 방지.)
+    # 다만 그 행이 오늘을 커버하는데 비현행으로 남아 있으면 현행으로만 올려 검색 공백을 닫는다.
     cur.execute(
         """
         SELECT id FROM law_articles
         WHERE law_id = %s AND article_no = %s
           AND paragraph_no IS NOT DISTINCT FROM %s AND item_no IS NULL
-          AND valid_from = %s
+          AND daterange(valid_from, valid_to, '[)') && daterange(%s, %s, '[)')
         """,
-        (law_id, row["article_no"], row["paragraph_no"], row["valid_from"]),
+        (law_id, row["article_no"], row["paragraph_no"], row["valid_from"], valid_to),
     )
-    if (dup := cur.fetchone()) is not None:
-        return dup[0], "unchanged"
+    if overlaps := cur.fetchall():
+        cur.execute(
+            """
+            UPDATE law_articles SET is_current = true
+            WHERE id = ANY(%s) AND NOT is_current
+              AND valid_from <= CURRENT_DATE
+              AND (valid_to IS NULL OR valid_to > CURRENT_DATE)
+            """,
+            ([o[0] for o in overlaps],),
+        )
+        return overlaps[0][0], "unchanged"
     is_current = row["valid_from"] <= date.today() < valid_to
     cur.execute(
         """
