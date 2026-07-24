@@ -25,11 +25,15 @@ def cur():
     conn.close()
 
 
-def test_three_laws_loaded(cur):
+def test_target_laws_loaded(cur):
+    """TARGET_LAWS 16종이 전부 laws 테이블에 있어야 한다 (테스트 합성 법령은 무시)."""
+    from src.ingest.laws import TARGET_LAWS
+
     cur.execute("SELECT law_id, law_name, hierarchy FROM laws ORDER BY law_id")
     rows = cur.fetchall()
-    assert {r[1] for r in rows} == {"관세법", "관세법 시행령", "관세법 시행규칙"}
-    assert {r[2] for r in rows} == {"법률", "시행령", "시행규칙"}
+    loaded_ids = {r[0] for r in rows}
+    assert {spec["law_id"] for spec in TARGET_LAWS} <= loaded_ids
+    assert {r[2] for r in rows if not r[0].startswith("TEST")} == {"법률", "시행령", "시행규칙"}
 
 
 def test_temporal_current_invariant(cur):

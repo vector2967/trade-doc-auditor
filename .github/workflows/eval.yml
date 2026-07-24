@@ -47,9 +47,11 @@ jobs:
 
       - name: Initial ingest (TARGET_LAWS)
         if: ${{ inputs.ingest }}
+        # 커밋된 캐시 사용: 본문/MST=data/raw, dense 벡터=data/dense_cache.npz
+        # → API 쿼터 소모 없음 + 임베딩 추론 생략(수십 분 → 수 분). 강제 재수집은 --no-cache.
         run: |
           python scripts/migrate.py
-          python -m src.ingest.laws --no-cache
+          python -m src.ingest.laws
 
       - name: Run recall eval
         run: python scripts/eval_recall.py

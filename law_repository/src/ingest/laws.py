@@ -9,15 +9,23 @@ dense(bge-m3)+bm25(sparse, idf) 로 인덱싱한다.
   upsert. content_hash 동일하면 아무것도 안 함(재임베딩 skip — 불변식).
 - 청킹: 조문 1청크. SPLIT_THRESHOLD 초과 조문만 항 단위 분할 + parent_article_pk.
   분할 시 부모 행은 Qdrant 미적재(자식이 검색 단위).
+- 캐시 3종(전부 커밋 대상 — API 쿼터·러너 CPU 시간 절약):
+  · 본문: data/raw/law_current_<ID>.json (lawgo)  · MST: data/raw/law_mst.json
+  · dense 벡터: data/dense_cache.npz — content sha256 키. 같은 텍스트+같은 모델이면
+    벡터가 결정적이므로 --no-cache 와 무관하게 항상 사용(미스만 추론).
 
 실행: law_repository/ 에서  python -m src.ingest.laws  [--no-cache] [--skip-embed]
 """
 from __future__ import annotations
 
 import hashlib
+import json
 import sys
 import uuid
 from datetime import date, datetime
+from pathlib import Path
+
+import numpy as np
 
 from src import lawgo
 from src.db.postgres import connect
@@ -48,6 +56,9 @@ TARGET_LAWS = [
 
 SPLIT_THRESHOLD = 6000  # bge-m3 8192 토큰 대비 여유. 관세 3법 최장 5,325자였으나 개별법 추가로 분할 발생 가능(항 단위 분할 경로 사용)
 
+MST_CACHE = Path("data/raw/law_mst.json")
+DENSE_CACHE = Path("data/dense_cache.npz")
+
 _POINT_NS = uuid.uuid5(uuid.NAMESPACE_URL, "trade-doc-auditor/law-article")
 
 
@@ -73,16 +84,29 @@ def point_id(law_id: str, article_no: int, paragraph_no: int | None, mst: str) -
 
 # ---------------------------------------------------------------- 파싱/청킹
 
-def resolve_current_mst(law_id: str, name: str) -> str:
+def resolve_current_mst(law_id: str, name: str, use_cache: bool = True) -> str:
     """현행법령 목록(lawSearch target=law)에서 법령일련번호(MST) 확인.
 
     본문 응답의 '법령키'는 법령ID+공포일자+공포번호 연결값이라 MST 가 아님 —
     Phase 3 변경이력(lsHstInf)의 법령일련번호와 조인하려면 진짜 MST 가 필요하다.
+    결과는 data/raw/law_mst.json 에 캐시 — 쿼터 소진/API 장애 시에도 재적재 가능.
     """
+    cached: dict[str, str] = (
+        json.loads(MST_CACHE.read_text(encoding="utf-8")) if MST_CACHE.exists() else {}
+    )
+    if use_cache and law_id in cached:
+        return cached[law_id]
     data = lawgo.get("lawSearch.do", target="law", query=name, display=100)
     for it in lawgo.as_list(data.get("LawSearch", {}).get("law")):
         if lawgo.squash(it.get("법령ID")) == law_id:
-            return lawgo.squash(it.get("법령일련번호"))
+            mst = lawgo.squash(it.get("법령일련번호"))
+            cached[law_id] = mst
+            MST_CACHE.parent.mkdir(parents=True, exist_ok=True)
+            MST_CACHE.write_text(
+                json.dumps(cached, ensure_ascii=False, indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
+            return mst
     raise LookupError(f"현행법령 목록에서 법령ID {law_id}({name}) 미발견")
 
 
@@ -274,11 +298,26 @@ def index_qdrant(batch_size: int = 64) -> int:
 
     qc = qdrant_client()
     ensure_collection(qc)
+
+    # dense 벡터 캐시 — content sha256 키. 미스만 추론(전 히트면 모델 로드 자체가 없음).
+    cache_vecs: dict[str, np.ndarray] = {}
+    if DENSE_CACHE.exists():
+        with np.load(DENSE_CACHE) as z:
+            cache_vecs = {k: z[k] for k in z.files}
+    cache_hits, cache_dirty = 0, False
+
     total = 0
     for i in range(0, len(pending), batch_size):
         batch = pending[i : i + batch_size]
         texts = [r[8] for r in batch]
-        dvecs = dense.encode(texts)
+        hashes = [_content_hash(t) for t in texts]
+        miss = [j for j, h in enumerate(hashes) if h not in cache_vecs]
+        if miss:
+            for j, v in zip(miss, dense.encode([texts[j] for j in miss])):
+                cache_vecs[hashes[j]] = v
+            cache_dirty = True
+        cache_hits += len(batch) - len(miss)
+        dvecs = [cache_vecs[h] for h in hashes]
         points, ids = [], []
         for r, dv in zip(batch, dvecs):
             pk, law_id, law_name, hierarchy, art_no, para_no, item_no, vfrom, text, mst = r
@@ -312,6 +351,9 @@ def index_qdrant(batch_size: int = 64) -> int:
             )
         total += len(points)
         print(f"[qdrant] {total}/{len(pending)} upsert")
+    if cache_dirty:
+        np.savez_compressed(DENSE_CACHE, **cache_vecs)
+    print(f"[cache] dense 히트 {cache_hits}/{total} · 저장분 {len(cache_vecs)}건 ({DENSE_CACHE})")
     return total
 
 
@@ -367,7 +409,7 @@ def main(argv: list[str]) -> int:
     use_cache = "--no-cache" not in argv
     for spec in TARGET_LAWS:
         body = lawgo.fetch_current_law(spec["law_id"], use_cache=use_cache)
-        mst = resolve_current_mst(spec["law_id"], spec["name"])
+        mst = resolve_current_mst(spec["law_id"], spec["name"], use_cache=use_cache)
         meta = build_meta(body, mst)
         assert meta["law_id"] == spec["law_id"], f"법령ID 불일치: {meta}"
         rows = parse_articles(body, meta)

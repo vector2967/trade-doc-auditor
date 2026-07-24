@@ -63,6 +63,8 @@ def test_amend_closes_open_row_and_preloads(cur):
 
 def test_promote_flips_on_enforcement_day(cur):
     """승격: 시행일 도달 시 구버전 demote + 신버전 promote. 재실행 멱등."""
+    # 실코퍼스에 시행일이 미래인 법령(약사법 등)이 있어 먼저 흡수 (트랜잭션 롤백으로 불침범)
+    promote(cur, qc=None, as_of=date(2098, 12, 31))
     old_pk = _seed_current(cur)
     new_pk, _ = _reconcile_article(cur, LAW, "m2", _row("v2", date(2099, 1, 1)))
 

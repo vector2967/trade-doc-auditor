@@ -17,9 +17,10 @@ Phase 5 `repository.expand_article()` 가 이 그래프 위에서 동작한다.
   - 헤딩 라인 `[법령명 라벨(제목)]` 은 자기 라벨이라 제거(관세'법 제1조' 꼬리 오탐 방지).
   - 「」 낫표 제거, "관세법 시행령/시행규칙" 은 단일 토큰으로 정규화.
   - 한정어(법/영/규칙/시행령/시행규칙/관세법…) + 제N조[의M] → 대상 법령 해석.
-    · 코퍼스 3법(관세법 001556 / 시행령 002421 / 시행규칙 006392)만 노드 대상.
+    · 코퍼스 16종(FAMILIES)만 노드 대상. bare 법/영/규칙 은 출발 조문의 패밀리 내에서 해석.
     · 이 법·같은 법 → 출발 조문의 법령. 한정어 없는 bare 제N조 → 동일 법령(self).
     · 외부 법령(외국환거래법 등) → 노드 없음 → 스킵. self 참조도 스킵.
+    · DELEGATES 는 동일 패밀리(법률→시행령→시행규칙) 내에서만. 패밀리 밖 참조는 CITES.
 
 DETAILED_IN(확인법령↔조문)은 확인법령(약사법 등)이 코퍼스에 없어 현재 데이터로 도출
 불가 — 확인법령 본문 적재 후 별도 단계. 여기서는 만들지 않는다.
@@ -35,13 +36,37 @@ from src.db.neo4j import driver as make_driver
 from src.db.postgres import connect
 from src.lawgo import jo_code
 
-# 코퍼스 3법. rank = 위계(작을수록 상위). DELEGATES 는 상위→하위.
-LAW_RANK = {"001556": 1, "002421": 2, "006392": 3}
+# 코퍼스 16종 — 패밀리별 위계. rank = 1 법률 / 2 시행령 / 3 시행규칙 (작을수록 상위).
+# DELEGATES 는 동일 패밀리 안에서만 상위→하위. TARGET_LAWS(src/ingest/laws.py)와 정합 유지.
+FAMILIES = {
+    "관세법": {1: "001556", 2: "002421", 3: "006392"},
+    "FTA관세특례법": {1: "010097", 2: "010175", 3: "010172"},
+    "관세환급특례법": {1: "000592", 2: "004043", 3: "007591"},
+    "대외무역법": {1: "001467", 2: "003313"},
+    "식물방역법": {1: "001513"},
+    "수입식품특별법": {1: "012247"},
+    "약사법": {1: "001783"},
+    "화장품법": {1: "002015"},
+    "전기용품법": {1: "001459"},
+}
+LAW_RANK = {law_id: rank for fam in FAMILIES.values() for rank, law_id in fam.items()}
+LAW_FAMILY = {law_id: name for name, fam in FAMILIES.items() for law_id in fam.values()}
 
-# 한정어(law qualifier) 후보. 긴/구체적인 것 먼저. 「」·"관세법 시행령" 은 사전 정규화됨.
+# 본문에 등장하는 법령명 → 패밀리. 긴 이름 먼저 매칭(endswith).
+_NAMED_FAMILY = [
+    ("수입식품안전관리특별법", "수입식품특별법"),
+    ("전기용품및생활용품안전관리법", "전기용품법"),
+    ("대외무역법", "대외무역법"),
+    ("식물방역법", "식물방역법"),
+    ("약사법", "약사법"),
+    ("화장품법", "화장품법"),
+    ("관세법", "관세법"),
+]
+
+# 한정어(law qualifier) 후보. 긴/구체적인 것 먼저. 「」 는 사전 정규화됨.
 _Q = (
-    r"관세법시행규칙|관세법시행령|이\s?법|같은\s?법|이\s?영|같은\s?영|"
-    r"시행규칙|시행령|[가-힣]{2,12}법|법|영|규칙"
+    r"[가-힣]{2,15}법\s?시행규칙|[가-힣]{2,15}법\s?시행령|이\s?법|같은\s?법|이\s?영|같은\s?영|"
+    r"시행규칙|시행령|[가-힣]{2,15}법|법|영|규칙"
 )
 _REF = re.compile(rf"(?:(?P<q>{_Q})\s*)?제(?P<no>\d+)조(?:의(?P<b>\d+))?")
 
@@ -53,12 +78,23 @@ def _resolve_qualifier(q: str | None, source_law_id: str) -> str | None:
     qn = q.replace(" ", "")
     if qn in ("이법", "같은법", "이영", "같은영"):
         return source_law_id
-    if qn.endswith("관세법시행규칙") or qn in ("시행규칙", "규칙"):
-        return "006392"
-    if qn.endswith("관세법시행령") or qn in ("시행령", "영"):
-        return "002421"
-    if qn.endswith("관세법") or qn == "법":
-        return "001556"
+    # 법령명 명시 → 해당 패밀리, 접미(시행령/시행규칙)로 rank 결정
+    rank = 1
+    if qn.endswith("시행규칙"):
+        rank, qn = 3, qn[: -len("시행규칙")]
+    elif qn.endswith("시행령"):
+        rank, qn = 2, qn[: -len("시행령")]
+    for name, fam in _NAMED_FAMILY:
+        if qn.endswith(name):
+            return FAMILIES[fam].get(rank)
+    # bare 법/영/규칙 → 출발 조문의 패밀리 내 위계로 해석
+    src_fam = FAMILIES[LAW_FAMILY[source_law_id]]
+    if qn in ("규칙", ""):  # ""=시행규칙/시행령 단독(위에서 접미 제거됨)
+        return src_fam.get(rank if rank > 1 else 3)
+    if qn == "영":
+        return src_fam.get(2)
+    if qn == "법":
+        return src_fam.get(1)
     return None  # 외국환거래법 등 외부 법령
 
 
@@ -145,9 +181,9 @@ def build(keep: bool = False, nodes: bool = True, edges: bool = True) -> None:
                         t_pk = pk_by_key.get((t_law, t_art))
                         if t_pk is None:  # 대상 조문이 현행 노드에 없음(폐지/미적재)
                             continue
-                        if LAW_RANK[law_id] == LAW_RANK[t_law]:
+                        if LAW_FAMILY[law_id] != LAW_FAMILY[t_law] or law_id == t_law:
                             cites.append({"s": pk, "t": t_pk, "basis": basis})
-                        else:  # 위계 교차 → 상위→하위 위임
+                        else:  # 동일 패밀리 위계 교차 → 상위→하위 위임
                             hi, lo = (pk, t_pk) if LAW_RANK[law_id] < LAW_RANK[t_law] else (t_pk, pk)
                             delegates.append({"s": hi, "t": lo, "basis": basis})
                 _write_edges(s, "CITES", _dedupe(cites))
@@ -184,15 +220,15 @@ def verify() -> None:
             c = s.run("MATCH ()-[e:CITES]->() RETURN count(e) AS c").single()["c"]
             d = s.run("MATCH ()-[e:DELEGATES]->() RETURN count(e) AS c").single()["c"]
             print(f"[verify] :Article {n} | CITES {c} | DELEGATES {d}")
-            # 위임 방향 불변식: 시작이 끝보다 상위 위계여야
+            # 위임 방향 불변식: 동일 패밀리 + 시작이 끝보다 상위 위계여야
             bad = s.run(
                 """
                 MATCH (hi:Article)-[:DELEGATES]->(lo:Article)
-                WITH hi, lo,
-                  CASE hi.law_id WHEN '001556' THEN 1 WHEN '002421' THEN 2 ELSE 3 END AS rh,
-                  CASE lo.law_id WHEN '001556' THEN 1 WHEN '002421' THEN 2 ELSE 3 END AS rl
-                WHERE rh >= rl RETURN count(*) AS bad
-                """
+                WHERE $fam[hi.law_id] <> $fam[lo.law_id]
+                   OR $rank[hi.law_id] >= $rank[lo.law_id]
+                RETURN count(*) AS bad
+                """,
+                fam=LAW_FAMILY, rank=LAW_RANK,
             ).single()["bad"]
             print(f"[verify] DELEGATES 방향 위반(상위→하위 아님): {bad}")
             print("\n[sample] 관세법 제226조가 위임한 하위 조문:")

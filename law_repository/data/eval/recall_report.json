@@ -1,0 +1,3073 @@
+{
+ "meta": {
+  "measured_at": "2026-07-25T04:44:11",
+  "limit": 10,
+  "ks": [
+   5,
+   10
+  ],
+  "arms": [
+   "dense",
+   "bm25"
+  ],
+  "goldset": "data/통관_DB_테스트_기록지.xlsx (Sheet1, 2026-07 수기 평가 47문항)",
+  "corpus_laws": [
+   "관세법",
+   "관세법 시행규칙",
+   "관세법 시행령",
+   "대외무역법",
+   "대외무역법 시행령",
+   "수입식품안전관리 특별법",
+   "수출용 원재료에 대한 관세 등 환급에 관한 특례법",
+   "수출용 원재료에 대한 관세 등 환급에 관한 특례법 시행규칙",
+   "수출용 원재료에 대한 관세 등 환급에 관한 특례법 시행령",
+   "식물방역법",
+   "약사법",
+   "자유무역협정의 이행을 위한 관세법의 특례에 관한 법률",
+   "자유무역협정의 이행을 위한 관세법의 특례에 관한 법률 시행규칙",
+   "자유무역협정의 이행을 위한 관세법의 특례에 관한 법률 시행령",
+   "전기용품 및 생활용품 안전관리법",
+   "화장품법"
+  ]
+ },
+ "summary": {
+  "n_questions": 47,
+  "n_skipped": 3,
+  "arms": {
+   "dense": {
+    "mean_recall@5": 0.517434988179669,
+    "mean_recall@5_strict": 0.517434988179669,
+    "hit_rate@5": 0.7659574468085106,
+    "mean_recall@10": 0.5928486997635933,
+    "mean_recall@10_strict": 0.5928486997635933,
+    "hit_rate@10": 0.8085106382978723
+   },
+   "bm25": {
+    "mean_recall@5": 0.2875886524822695,
+    "mean_recall@5_strict": 0.2875886524822695,
+    "hit_rate@5": 0.425531914893617,
+    "mean_recall@10": 0.4086879432624113,
+    "mean_recall@10_strict": 0.4086879432624113,
+    "hit_rate@10": 0.5957446808510638
+   }
+  },
+  "coverage_gap": {}
+ },
+ "skipped": [
+  {
+   "id": 21,
+   "reason": "간이정액환급(관세환급특례법) — 평가자 골드 미확정. 특례법 적재 완료 후 골드 확정 필요"
+  },
+  {
+   "id": 22,
+   "reason": "개별환급(관세환급특례법) — 평가자 골드 미확정. 특례법 적재 완료 후 골드 확정 필요"
+  },
+  {
+   "id": 44,
+   "reason": "원산지증명서(FTA관세특례법) — 평가자 골드 미확정. 특례법 적재 완료 후 골드 확정 필요"
+  }
+ ],
+ "questions": [
+  {
+   "id": 1,
+   "question": "물건이 주문한 거랑 달라서 다시 돌려보내면 냈던 세금 받을 수 있나",
+   "n_gold_covered": 4,
+   "n_gold_strict": 4,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법106",
+      "영121",
+      "영216의5",
+      "영123",
+      "영124의2",
+      "법106의2",
+      "환급법14",
+      "영216의4",
+      "법199의2",
+      "환급법23"
+     ],
+     "gold_hits": {
+      "법106": 1,
+      "영121": 2,
+      "영123": 4
+     },
+     "gold_misses": [
+      "영122"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.75,
+     "recall@5_strict": 0.75,
+     "hit@5": true,
+     "recall@10": 0.75,
+     "recall@10_strict": 0.75,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "화장품법31",
+      "법99",
+      "법210",
+      "법25",
+      "영2의2",
+      "영140의2",
+      "법14",
+      "법46",
+      "법111",
+      "수입식품법18"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법106",
+      "영121",
+      "영122",
+      "영123"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 2,
+   "question": "수입한 제품에 하자가 있어서 반품하는데 관세 돌려받는 방법",
+   "n_gold_covered": 4,
+   "n_gold_strict": 4,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법106",
+      "영123",
+      "영121",
+      "영124의2",
+      "법106의2",
+      "영122",
+      "환급영27",
+      "영216의5",
+      "법199의2",
+      "법78"
+     ],
+     "gold_hits": {
+      "법106": 1,
+      "영123": 2,
+      "영121": 3,
+      "영122": 6
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.75,
+     "recall@5_strict": 0.75,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "영124의2",
+      "규칙11",
+      "영119",
+      "영29",
+      "규칙58의2",
+      "영7",
+      "대무영27",
+      "영152",
+      "규칙29",
+      "대무영28"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법106",
+      "영121",
+      "영122",
+      "영123"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 3,
+   "question": "큰 설비를 수입하는데 세금을 한 번에 못 내면 나눠 낼 수 있나",
+   "n_gold_covered": 4,
+   "n_gold_strict": 4,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법107",
+      "규칙59",
+      "영125",
+      "법89",
+      "환급법6",
+      "영126",
+      "법71",
+      "영127",
+      "환급영2",
+      "대무영59의2"
+     ],
+     "gold_hits": {
+      "법107": 1,
+      "규칙59": 2,
+      "영126": 6,
+      "영127": 8
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "영174",
+      "대무영51",
+      "영231",
+      "환급법15",
+      "영259의2",
+      "대무영59",
+      "법323",
+      "규칙65",
+      "법9",
+      "법191"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법107",
+      "영126",
+      "영127",
+      "규칙59"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 4,
+   "question": "택배로 받은 물건에 세금이 잘못 매겨진 것 같은데 바로잡으려면 어떻게 해야하나",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "FTA법14",
+      "영121",
+      "영263",
+      "영32의4",
+      "영123",
+      "FTA영9",
+      "법106",
+      "법260",
+      "법38의2",
+      "법270"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법38의3",
+      "영34"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    },
+    "bm25": {
+     "retrieved": [
+      "영259의2",
+      "영213의2",
+      "법46",
+      "영1의2",
+      "영135의4",
+      "영285의2",
+      "영276의2",
+      "영152",
+      "화장품법15",
+      "화장품법13"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법38의3",
+      "영34"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 5,
+   "question": "세금을 실수로 더 냈을 때 그 돈을 돌려받으려면",
+   "n_gold_covered": 8,
+   "n_gold_strict": 8,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법47",
+      "환급영32",
+      "환급법22",
+      "환급법21",
+      "환급영31",
+      "환급법23",
+      "법46",
+      "법38의2",
+      "영123",
+      "법38의3"
+     ],
+     "gold_hits": {
+      "법46": 7
+     },
+     "gold_misses": [
+      "영50",
+      "영51",
+      "영52",
+      "영53",
+      "영54",
+      "영55",
+      "영56"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.125,
+     "recall@10_strict": 0.125,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "영259의2",
+      "대무영59",
+      "환급규칙3",
+      "영141의5",
+      "전기용품법43",
+      "법150",
+      "법25",
+      "법211",
+      "영54",
+      "법148"
+     ],
+     "gold_hits": {
+      "영54": 9
+     },
+     "gold_misses": [
+      "법46",
+      "영50",
+      "영51",
+      "영52",
+      "영53",
+      "영55",
+      "영56"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.125,
+     "recall@10_strict": 0.125,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 6,
+   "question": "통관이 다 끝나기 전에 물건을 미리 빼올 수 있나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법140",
+      "법161",
+      "법217",
+      "법244",
+      "영240",
+      "법208",
+      "법150",
+      "법118",
+      "법304",
+      "법136"
+     ],
+     "gold_hits": {
+      "법244": 4
+     },
+     "gold_misses": [
+      "법252",
+      "영256"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.3333333333333333,
+     "recall@5_strict": 0.3333333333333333,
+     "hit@5": true,
+     "recall@10": 0.3333333333333333,
+     "recall@10_strict": 0.3333333333333333,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "수입식품법21",
+      "FTA법23",
+      "법275의2",
+      "법62",
+      "법56",
+      "영258의3",
+      "영187",
+      "법244",
+      "영258의4",
+      "전기용품법41"
+     ],
+     "gold_hits": {
+      "법244": 8
+     },
+     "gold_misses": [
+      "법252",
+      "영256"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.3333333333333333,
+     "recall@10_strict": 0.3333333333333333,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 7,
+   "question": "신고를 하기도 전에 급해서 물건을 먼저 꺼내야 할 때",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "영257",
+      "법253",
+      "법186",
+      "법192",
+      "법252",
+      "영249",
+      "법244",
+      "영182",
+      "영181",
+      "법141"
+     ],
+     "gold_hits": {
+      "영257": 1,
+      "법253": 2
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법16",
+      "법275의2",
+      "법27",
+      "법38",
+      "법216",
+      "법270의2",
+      "법186",
+      "영6",
+      "법189",
+      "전기용품법33"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법253",
+      "영257"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 8,
+   "question": "해외 직구한 값싼 물건도 세금을 내야 하나",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법30",
+      "FTA영22",
+      "FTA영23",
+      "FTA영2",
+      "법188",
+      "FTA규칙7",
+      "FTA규칙24",
+      "FTA영24",
+      "영27",
+      "규칙7의6"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법94",
+      "규칙45"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    },
+    "bm25": {
+     "retrieved": [
+      "대무영59",
+      "영259의2",
+      "전기용품법13",
+      "전기용품법22",
+      "전기용품법34의7",
+      "수입식품법41",
+      "대무영59의2",
+      "화장품법28",
+      "대무법33의2",
+      "환급영21"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법94",
+      "규칙45"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 9,
+   "question": "판매용이 아니라 샘플로 조금 들여오는 물건도 세금 내나",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법30",
+      "환급규칙14",
+      "영20의2",
+      "법270",
+      "환급법19",
+      "영17",
+      "규칙37",
+      "규칙59",
+      "영27",
+      "FTA규칙5"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법94",
+      "규칙45"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    },
+    "bm25": {
+     "retrieved": [
+      "영77",
+      "영209",
+      "영63",
+      "법210",
+      "법14",
+      "법5",
+      "규칙4의2",
+      "규칙3의3",
+      "영72",
+      "법275의2"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법94",
+      "규칙45"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 10,
+   "question": "여행 다녀오면서 가방에 넣어온 개인 물건의 세금 내야하나?",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "규칙48",
+      "법96",
+      "법43",
+      "규칙48의3",
+      "규칙7의3",
+      "법16",
+      "규칙49의2",
+      "법81",
+      "법241",
+      "영124의2"
+     ],
+     "gold_hits": {
+      "규칙48": 1,
+      "법96": 2
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "화장품법18",
+      "법275의2",
+      "영243",
+      "법14",
+      "수입식품법45",
+      "화장품법39",
+      "대무법57",
+      "규칙49의2",
+      "법279",
+      "수입식품법41"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법96",
+      "규칙48"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 11,
+   "question": "수출했다가 안 팔려서 다시 국내로 들여오는 물건의 세금",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "영17",
+      "법99",
+      "환급규칙2",
+      "영124의2",
+      "법106의2",
+      "규칙58의2",
+      "환급법4",
+      "영27",
+      "법241",
+      "영121"
+     ],
+     "gold_hits": {
+      "법99": 2
+     },
+     "gold_misses": [
+      "규칙54"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법196",
+      "수입식품법2",
+      "화장품법18",
+      "영260",
+      "법275의2",
+      "FTA법30",
+      "법106의2",
+      "수입식품법5",
+      "대무법39",
+      "규칙69의4"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법99",
+      "규칙54"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 12,
+   "question": "전시회에 잠깐 썼다가 다시 내보낼 물건을 들여올 때 면세되나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법99",
+      "법97",
+      "법94",
+      "규칙54",
+      "규칙48의2",
+      "법92",
+      "법98",
+      "법96",
+      "법93",
+      "FTA법30"
+     ],
+     "gold_hits": {
+      "법97": 2
+     },
+     "gold_misses": [
+      "영115",
+      "규칙50"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.3333333333333333,
+     "recall@5_strict": 0.3333333333333333,
+     "hit@5": true,
+     "recall@10": 0.3333333333333333,
+     "recall@10_strict": 0.3333333333333333,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법5",
+      "법275의2",
+      "법99",
+      "규칙76",
+      "법190",
+      "영115",
+      "영260",
+      "대무법48",
+      "법106의2",
+      "법210"
+     ],
+     "gold_hits": {
+      "영115": 6
+     },
+     "gold_misses": [
+      "법97",
+      "규칙50"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.3333333333333333,
+     "recall@10_strict": 0.3333333333333333,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 13,
+   "question": "물건 가격이 아직 확정이 안 됐는데 먼저 신고해도 되나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법28",
+      "영16",
+      "법27",
+      "법37",
+      "규칙3",
+      "규칙7의2",
+      "영15",
+      "영222",
+      "영31",
+      "법30"
+     ],
+     "gold_hits": {
+      "법28": 1,
+      "영16": 2,
+      "규칙3": 5
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법28",
+      "영16",
+      "영6",
+      "FTA영35",
+      "영24",
+      "영22",
+      "규칙3의2",
+      "법21",
+      "규칙3",
+      "법16"
+     ],
+     "gold_hits": {
+      "법28": 1,
+      "영16": 2,
+      "규칙3": 9
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 14,
+   "question": "원산지 표시가 거짓으로 붙어 있는 물건은 어떻게 되나",
+   "n_gold_covered": 5,
+   "n_gold_strict": 5,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "대무법38",
+      "대무법33",
+      "대무영56",
+      "법230",
+      "대무영57",
+      "FTA영47",
+      "대무영60의2",
+      "대무영61",
+      "대무법34",
+      "FTA법14"
+     ],
+     "gold_hits": {
+      "대무법38": 1,
+      "대무법33": 2,
+      "법230": 4,
+      "대무법34": 9
+     },
+     "gold_misses": [
+      "대무법33의2"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.6,
+     "recall@5_strict": 0.6,
+     "hit@5": true,
+     "recall@10": 0.8,
+     "recall@10_strict": 0.8,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법230",
+      "대무법38",
+      "대무법33",
+      "FTA영46의2",
+      "대무영60의2",
+      "대무영56",
+      "대무영57",
+      "전기용품법51",
+      "법233의3",
+      "FTA법44"
+     ],
+     "gold_hits": {
+      "법230": 1,
+      "대무법38": 2,
+      "대무법33": 3
+     },
+     "gold_misses": [
+      "대무법33의2",
+      "대무법34"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.6,
+     "recall@5_strict": 0.6,
+     "hit@5": true,
+     "recall@10": 0.6,
+     "recall@10_strict": 0.6,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 15,
+   "question": "짝퉁 브랜드 제품이 들어오면 세관에서 어떻게 막나",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법230의2",
+      "법270",
+      "법230",
+      "법51",
+      "대무법38",
+      "법241",
+      "영236의2",
+      "법231",
+      "대무법33",
+      "법178"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법235",
+      "영243"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    },
+    "bm25": {
+     "retrieved": [
+      "전기용품법38",
+      "전기용품법36",
+      "법236",
+      "전기용품법23",
+      "법187",
+      "영240",
+      "영144의4",
+      "화장품법2",
+      "전기용품법15",
+      "전기용품법6"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법235",
+      "영243"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 16,
+   "question": "다른 법에서 허가나 검사를 받아야 하는 물건인지 통관 때 확인하는 근거",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법226",
+      "영134",
+      "법265",
+      "영233",
+      "영161",
+      "법109",
+      "대무영33의2",
+      "규칙44",
+      "영251",
+      "영175"
+     ],
+     "gold_hits": {
+      "법226": 1,
+      "영233": 4
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법257",
+      "법192",
+      "전기용품법17",
+      "법246의3",
+      "전기용품법8",
+      "수입식품법21",
+      "법226",
+      "대무법19의5",
+      "영233",
+      "법161"
+     ],
+     "gold_hits": {
+      "법226": 7,
+      "영233": 9
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 17,
+   "question": "검역을 거쳐야 통관되는 농산물인지 어떻게 확인하나",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "FTA규칙24",
+      "수입식품법11",
+      "영236의2",
+      "법151",
+      "영242",
+      "법229",
+      "FTA법17",
+      "FTA영33",
+      "법140",
+      "수입식품법21"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법226",
+      "식물방역법12"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    },
+    "bm25": {
+     "retrieved": [
+      "영282의2",
+      "수입식품법11",
+      "FTA규칙12",
+      "영226",
+      "수입식품법20",
+      "영27",
+      "규칙4",
+      "영233",
+      "전기용품법2",
+      "법326"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법226",
+      "식물방역법12"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 18,
+   "question": "수입 식품을 들여올 때 안전 관련해서 받아야 하는 확인엔 뭐가 있어?",
+   "n_gold_covered": 4,
+   "n_gold_strict": 4,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "수입식품법38",
+      "수입식품법20",
+      "수입식품법39",
+      "수입식품법26",
+      "수입식품법21",
+      "수입식품법25",
+      "수입식품법22",
+      "수입식품법11",
+      "수입식품법3",
+      "전기용품법38"
+     ],
+     "gold_hits": {
+      "수입식품법20": 2,
+      "수입식품법21": 5
+     },
+     "gold_misses": [
+      "법226",
+      "수입식품법15"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "수입식품법17",
+      "전기용품법17",
+      "전기용품법8",
+      "수입식품법26",
+      "전기용품법5",
+      "수입식품법25의3",
+      "법109",
+      "화장품법5",
+      "환급규칙3",
+      "수입식품법11"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법226",
+      "수입식품법15",
+      "수입식품법20",
+      "수입식품법21"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 19,
+   "question": "제3국을 경유한 물건도 원산지 혜택을 받을 수 있나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "규칙76",
+      "FTA규칙5",
+      "FTA규칙24",
+      "FTA법7",
+      "대무법33",
+      "법229",
+      "대무영61",
+      "FTA규칙2",
+      "FTA규칙4",
+      "규칙74"
+     ],
+     "gold_hits": {
+      "규칙76": 1,
+      "FTA법7": 4
+     },
+     "gold_misses": [
+      "FTA법5"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 0.6666666666666666,
+     "recall@10_strict": 0.6666666666666666,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "FTA규칙5",
+      "법255의3",
+      "규칙76",
+      "영72",
+      "영259의4",
+      "FTA영23",
+      "FTA규칙8",
+      "대무법34",
+      "법230"
+     ],
+     "gold_hits": {
+      "규칙76": 3
+     },
+     "gold_misses": [
+      "FTA법5",
+      "FTA법7"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.3333333333333333,
+     "recall@5_strict": 0.3333333333333333,
+     "hit@5": true,
+     "recall@10": 0.3333333333333333,
+     "recall@10_strict": 0.3333333333333333,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 20,
+   "question": "FTA 혜택을 통관할 때 못 받았는데 나중에 신청 가능한가",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "FTA영5",
+      "FTA법9",
+      "FTA법8",
+      "규칙27의2",
+      "규칙15의2",
+      "법109",
+      "FTA영4",
+      "법102",
+      "환급법14",
+      "FTA영17"
+     ],
+     "gold_hits": {
+      "FTA영5": 1,
+      "FTA법9": 2
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법255의3",
+      "영72",
+      "영259의4",
+      "법236",
+      "영233",
+      "규칙49",
+      "대무영57",
+      "규칙27의2",
+      "규칙15의2",
+      "규칙69의2"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "FTA법9",
+      "FTA영5"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 23,
+   "question": "이사하면서 외국에서 쓰던 살림살이를 가져올 때 세금",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법17",
+      "환급법18",
+      "법96",
+      "법241",
+      "규칙48의2",
+      "영124의2",
+      "법106의2",
+      "법188",
+      "법4",
+      "법106"
+     ],
+     "gold_hits": {
+      "법96": 3,
+      "규칙48의2": 5
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법78",
+      "규칙48의2",
+      "대무법38",
+      "법139",
+      "법196",
+      "환급규칙2",
+      "대무영2",
+      "영264",
+      "규칙70",
+      "전기용품법17"
+     ],
+     "gold_hits": {
+      "규칙48의2": 2
+     },
+     "gold_misses": [
+      "법96"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 24,
+   "question": "대학 연구실에서 실험용으로 쓰는 장비를 수입할 때 감면되나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법90",
+      "규칙37",
+      "규칙38",
+      "법95",
+      "법92",
+      "법101",
+      "법96",
+      "규칙48의3",
+      "법99",
+      "규칙41"
+     ],
+     "gold_hits": {
+      "법90": 1,
+      "규칙37": 2,
+      "규칙38": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법90",
+      "법105",
+      "법322의2",
+      "법191",
+      "규칙37",
+      "법108",
+      "규칙35",
+      "대무영43",
+      "규칙50",
+      "규칙56"
+     ],
+     "gold_hits": {
+      "법90": 1,
+      "규칙37": 5
+     },
+     "gold_misses": [
+      "규칙38"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 0.6666666666666666,
+     "recall@10_strict": 0.6666666666666666,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 25,
+   "question": "종교단체나 복지시설에 기증되는 물품도 세금을 내야 하나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법91",
+      "규칙39",
+      "규칙40",
+      "법92",
+      "규칙42",
+      "규칙38",
+      "규칙44",
+      "영248",
+      "법93",
+      "법69"
+     ],
+     "gold_hits": {
+      "법91": 1,
+      "규칙39": 2,
+      "규칙40": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법91",
+      "규칙39",
+      "규칙40",
+      "법273",
+      "법90",
+      "영220",
+      "영259의2",
+      "규칙79의4",
+      "대무영32의3",
+      "영32의4"
+     ],
+     "gold_hits": {
+      "법91": 1,
+      "규칙39": 2,
+      "규칙40": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 26,
+   "question": "대사관에서 쓰는 물건은 관세가 면제되나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법88",
+      "규칙34",
+      "규칙48의2",
+      "법92",
+      "법96",
+      "규칙48",
+      "규칙42",
+      "FTA법30",
+      "규칙49",
+      "규칙48의3"
+     ],
+     "gold_hits": {
+      "법88": 1,
+      "규칙34": 2
+     },
+     "gold_misses": [
+      "영108"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 0.6666666666666666,
+     "recall@10_strict": 0.6666666666666666,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "영108",
+      "규칙41",
+      "법88",
+      "규칙45",
+      "FTA규칙30",
+      "규칙48의2",
+      "규칙43",
+      "규칙48",
+      "규칙48의3",
+      "규칙54"
+     ],
+     "gold_hits": {
+      "영108": 1,
+      "법88": 3
+     },
+     "gold_misses": [
+      "규칙34"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 0.6666666666666666,
+     "recall@10_strict": 0.6666666666666666,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 27,
+   "question": "해외에 보내서 가공만 하고 다시 들여온 제품의 세금 계산",
+   "n_gold_covered": 4,
+   "n_gold_strict": 4,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "환급법10",
+      "영124의2",
+      "영119",
+      "환급법23",
+      "환급영30",
+      "환급법7",
+      "법106의2",
+      "법188",
+      "환급법3",
+      "환급법13"
+     ],
+     "gold_hits": {
+      "영119": 3
+     },
+     "gold_misses": [
+      "법101",
+      "규칙56",
+      "규칙57"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.25,
+     "recall@5_strict": 0.25,
+     "hit@5": true,
+     "recall@10": 0.25,
+     "recall@10_strict": 0.25,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "규칙56",
+      "수입식품법2",
+      "법99",
+      "규칙57",
+      "전기용품법35",
+      "화장품법30",
+      "전기용품법2",
+      "영199",
+      "FTA규칙35",
+      "전기용품법37"
+     ],
+     "gold_hits": {
+      "규칙56": 1,
+      "규칙57": 4
+     },
+     "gold_misses": [
+      "법101",
+      "영119"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 28,
+   "question": "신고를 잘못 넣었는데 없던 일로 되돌릴 수 있나",
+   "n_gold_covered": 5,
+   "n_gold_strict": 5,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법249",
+      "영176",
+      "영256",
+      "법38의2",
+      "법248",
+      "법250",
+      "법276",
+      "수입식품법20",
+      "법38의3",
+      "화장품법6"
+     ],
+     "gold_hits": {
+      "법38의2": 4,
+      "법250": 6,
+      "법38의3": 9
+     },
+     "gold_misses": [
+      "영253",
+      "영254"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.2,
+     "recall@5_strict": 0.2,
+     "hit@5": true,
+     "recall@10": 0.6,
+     "recall@10_strict": 0.6,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법269",
+      "영56",
+      "영247",
+      "법198",
+      "법244",
+      "규칙5의2",
+      "화장품법13",
+      "법218",
+      "법245",
+      "화장품법16"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법250",
+      "법38의2",
+      "법38의3",
+      "영253",
+      "영254"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 29,
+   "question": "물건 값을 정하는 기본 원칙이 실제 거래한 금액인가",
+   "n_gold_covered": 8,
+   "n_gold_strict": 8,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법30",
+      "법32",
+      "규칙10",
+      "영27",
+      "영58",
+      "영22",
+      "규칙73의2",
+      "법31",
+      "법33",
+      "대무법10"
+     ],
+     "gold_hits": {
+      "법30": 1,
+      "영22": 6
+     },
+     "gold_misses": [
+      "영17",
+      "영18",
+      "영19",
+      "영20",
+      "영21",
+      "영23"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.125,
+     "recall@5_strict": 0.125,
+     "hit@5": true,
+     "recall@10": 0.25,
+     "recall@10_strict": 0.25,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법30",
+      "영18의2",
+      "대무법10",
+      "영20",
+      "규칙10",
+      "법110의2",
+      "영3",
+      "영187의4",
+      "대무법3",
+      "영20의2"
+     ],
+     "gold_hits": {
+      "법30": 1,
+      "영20": 4
+     },
+     "gold_misses": [
+      "영17",
+      "영18",
+      "영19",
+      "영21",
+      "영22",
+      "영23"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.25,
+     "recall@5_strict": 0.25,
+     "hit@5": true,
+     "recall@10": 0.25,
+     "recall@10_strict": 0.25,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 30,
+   "question": "운임이나 보험료도 세금 매기는 금액에 포함되나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "영20",
+      "규칙4의3",
+      "영231의2",
+      "영247",
+      "영28",
+      "법16",
+      "법42",
+      "법70",
+      "규칙81",
+      "법34"
+     ],
+     "gold_hits": {
+      "영20": 1,
+      "법34": 10
+     },
+     "gold_misses": [
+      "법30"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.3333333333333333,
+     "recall@5_strict": 0.3333333333333333,
+     "hit@5": true,
+     "recall@10": 0.6666666666666666,
+     "recall@10_strict": 0.6666666666666666,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "영20",
+      "영119",
+      "규칙4의3",
+      "영15",
+      "법34",
+      "법270의2",
+      "규칙73의2",
+      "법33",
+      "법30",
+      "환급법16"
+     ],
+     "gold_hits": {
+      "영20": 1,
+      "법34": 5,
+      "법30": 9
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 31,
+   "question": "소액으로 자주 들여오는 물건에 매기는 단순한 세율이 있나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "환급법19",
+      "법81",
+      "영30",
+      "법49",
+      "환급영30",
+      "법71",
+      "법72",
+      "영247",
+      "법69",
+      "영96"
+     ],
+     "gold_hits": {
+      "법81": 2,
+      "영96": 10
+     },
+     "gold_misses": [
+      "규칙7"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.3333333333333333,
+     "recall@5_strict": 0.3333333333333333,
+     "hit@5": true,
+     "recall@10": 0.6666666666666666,
+     "recall@10_strict": 0.6666666666666666,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "대무영67",
+      "대무영55",
+      "FTA법5",
+      "대무영61",
+      "법82",
+      "대무법38",
+      "대무법33",
+      "환급영27",
+      "환급법19",
+      "FTA법46"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법81",
+      "영96",
+      "규칙7"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 32,
+   "question": "여러 물건을 한꺼번에 신고할 때 세율을 하나로 합의할 수 있나",
+   "n_gold_covered": 1,
+   "n_gold_strict": 1,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법82",
+      "환급법6",
+      "규칙59",
+      "환급영12",
+      "환급법19",
+      "법28",
+      "법29",
+      "환급법11",
+      "환급영27",
+      "FTA영3"
+     ],
+     "gold_hits": {
+      "법82": 1
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법9",
+      "법82",
+      "법81",
+      "FTA영22",
+      "법149",
+      "환급법19",
+      "법275의2",
+      "법80",
+      "영95",
+      "법50"
+     ],
+     "gold_hits": {
+      "법82": 2
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 33,
+   "question": "군수품이나 정부가 쓰는 물건도 관세를 내나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법92",
+      "규칙41",
+      "영18",
+      "법4",
+      "법16",
+      "법241",
+      "영258",
+      "규칙37",
+      "규칙42",
+      "규칙39"
+     ],
+     "gold_hits": {
+      "법92": 1,
+      "규칙41": 2,
+      "규칙42": 9
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법92",
+      "법14",
+      "법16",
+      "규칙42",
+      "규칙40",
+      "법100",
+      "수입식품법10의2",
+      "대무영65",
+      "대무영4의2",
+      "규칙41"
+     ],
+     "gold_hits": {
+      "법92": 1,
+      "규칙42": 4,
+      "규칙41": 10
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 34,
+   "question": "장애인이 쓰는 보조기구를 수입하면 세금이 면제되나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법91",
+      "규칙40",
+      "규칙39",
+      "법92",
+      "FTA법30",
+      "법93",
+      "FTA규칙30",
+      "규칙48",
+      "법96",
+      "법88"
+     ],
+     "gold_hits": {
+      "법91": 1,
+      "규칙40": 2,
+      "규칙39": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법91",
+      "규칙41",
+      "규칙40",
+      "규칙43",
+      "FTA규칙30",
+      "규칙39",
+      "규칙50",
+      "규칙48의3",
+      "규칙48의2",
+      "규칙45"
+     ],
+     "gold_hits": {
+      "법91": 1,
+      "규칙40": 3,
+      "규칙39": 6
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 35,
+   "question": "전략물자에 해당하는 품목을 수출할 때 따로 허가가 필요한가",
+   "n_gold_covered": 1,
+   "n_gold_strict": 1,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "대무법19의3",
+      "대무법19의2",
+      "대무영33",
+      "대무법19의5",
+      "대무법19의4",
+      "대무법19의6",
+      "대무법30",
+      "대무영33의6",
+      "대무법19",
+      "대무영33의2"
+     ],
+     "gold_hits": {
+      "대무법19의2": 2
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "대무영47",
+      "대무법30",
+      "대무법24",
+      "대무법19의2",
+      "대무영33의3",
+      "대무법19의5",
+      "대무법22",
+      "대무법26",
+      "대무법19의6",
+      "대무법53"
+     ],
+     "gold_hits": {
+      "대무법19의2": 4
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 36,
+   "question": "물건에 원산지를 반드시 표시해야 하는 규정은 어디에 있나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "대무영56",
+      "대무법33",
+      "대무영57",
+      "대무법34",
+      "대무영55",
+      "대무법36",
+      "법229",
+      "대무영61",
+      "규칙74",
+      "FTA법7"
+     ],
+     "gold_hits": {
+      "대무영56": 1,
+      "대무법33": 2,
+      "대무영55": 5
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "대무영56",
+      "법117",
+      "대무법33",
+      "법230",
+      "대무영57",
+      "대무영55",
+      "대무영61",
+      "대무영60의2",
+      "대무법38",
+      "대무영58"
+     ],
+     "gold_hits": {
+      "대무영56": 1,
+      "대무법33": 3,
+      "대무영55": 6
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 37,
+   "question": "수입 화장품이나 의약품을 들여올 때 별도로 받아야 하는 허가",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "화장품법30",
+      "법161",
+      "영161",
+      "화장품법15",
+      "수입식품법36",
+      "대무영33의2",
+      "대무법19의5",
+      "영200",
+      "영204",
+      "대무영33의4"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법226",
+      "약사법42",
+      "화장품법3"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    },
+    "bm25": {
+     "retrieved": [
+      "화장품법23",
+      "화장품법5",
+      "화장품법18의2",
+      "법109",
+      "화장품법5의2",
+      "화장품법23의2",
+      "화장품법34",
+      "규칙40",
+      "화장품법4",
+      "화장품법2"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법226",
+      "약사법42",
+      "화장품법3"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 38,
+   "question": "전기제품을 수입할 때 안전 인증을 받아야 통관되나",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "전기용품법8",
+      "전기용품법5",
+      "전기용품법9",
+      "전기용품법38",
+      "전기용품법6",
+      "전기용품법17",
+      "전기용품법2",
+      "전기용품법10",
+      "전기용품법16",
+      "전기용품법40"
+     ],
+     "gold_hits": {
+      "전기용품법5": 2
+     },
+     "gold_misses": [
+      "법226"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "전기용품법5",
+      "전기용품법8",
+      "수입식품법6의2",
+      "전기용품법9",
+      "전기용품법6",
+      "전기용품법7",
+      "전기용품법11",
+      "전기용품법2",
+      "전기용품법10",
+      "화장품법32"
+     ],
+     "gold_hits": {
+      "전기용품법5": 1
+     },
+     "gold_misses": [
+      "법226"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 39,
+   "question": "가격이 나중에 확정된 뒤 처음 낸 세금과 차액을 정산하는 절차",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "환급법7",
+      "법30",
+      "환급영6",
+      "법37의2",
+      "영222",
+      "규칙73의2",
+      "규칙10",
+      "영16",
+      "규칙7의2",
+      "영18의2"
+     ],
+     "gold_hits": {
+      "영16": 8
+     },
+     "gold_misses": [
+      "법28",
+      "규칙3"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.3333333333333333,
+     "recall@10_strict": 0.3333333333333333,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법28",
+      "영67",
+      "영83",
+      "영16",
+      "환급법16",
+      "환급법21",
+      "영6",
+      "법30",
+      "법53",
+      "대무영60의2"
+     ],
+     "gold_hits": {
+      "법28": 1,
+      "영16": 4
+     },
+     "gold_misses": [
+      "규칙3"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 0.6666666666666666,
+     "recall@10_strict": 0.6666666666666666,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 40,
+   "question": "세관이 검사 대상으로 고를 물건을 위험도로 가려내는 기준",
+   "n_gold_covered": 1,
+   "n_gold_strict": 1,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법265",
+      "규칙9",
+      "법255의7",
+      "법110의3",
+      "영248의2",
+      "법300",
+      "영131",
+      "영251",
+      "영251의2",
+      "법230의2"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법246"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    },
+    "bm25": {
+     "retrieved": [
+      "영189",
+      "전기용품법41",
+      "법244",
+      "법275의2",
+      "환급규칙12",
+      "대무법48",
+      "대무영28",
+      "법255의7",
+      "수입식품법25의4",
+      "전기용품법34의3"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법246"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 41,
+   "question": "환경오염을 막는 설비를 수입하면 관세를 깎아주나",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법95",
+      "규칙46",
+      "규칙47",
+      "법89",
+      "법101",
+      "법51",
+      "규칙41",
+      "법92",
+      "법93",
+      "규칙37"
+     ],
+     "gold_hits": {
+      "법95": 1,
+      "규칙46": 2,
+      "규칙47": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법95",
+      "규칙46",
+      "법92",
+      "규칙47",
+      "대무영51",
+      "규칙42",
+      "영174",
+      "규칙41",
+      "법107",
+      "규칙48의3"
+     ],
+     "gold_hits": {
+      "법95": 1,
+      "규칙46": 2,
+      "규칙47": 4
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 42,
+   "question": "수입한 그대로 다시 수출하는 자가사용 물건의 관세 환급",
+   "n_gold_covered": 3,
+   "n_gold_strict": 3,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "영124의2",
+      "법106의2",
+      "규칙58의2",
+      "영216의5",
+      "영121",
+      "법106",
+      "환급법4",
+      "법199의2",
+      "환급영18",
+      "환급법3"
+     ],
+     "gold_hits": {
+      "영124의2": 1,
+      "법106의2": 2,
+      "규칙58의2": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법106의2",
+      "규칙58의2",
+      "영124의2",
+      "환급법3",
+      "영7",
+      "영270",
+      "환급법9",
+      "법99",
+      "법286",
+      "환급법11"
+     ],
+     "gold_hits": {
+      "법106의2": 1,
+      "규칙58의2": 2,
+      "영124의2": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 43,
+   "question": "담보를 걸고 통관 수리 전에 물건을 반출하는 조건",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법252",
+      "영256",
+      "법253",
+      "영241",
+      "법157의2",
+      "법238",
+      "영257",
+      "법248",
+      "환급영3",
+      "법212"
+     ],
+     "gold_hits": {
+      "법252": 1,
+      "영256": 2
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법252",
+      "영241",
+      "환급영3",
+      "법9",
+      "법253",
+      "영11",
+      "법2",
+      "영131",
+      "법25",
+      "영10"
+     ],
+     "gold_hits": {
+      "법252": 1
+     },
+     "gold_misses": [
+      "영256"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 45,
+   "question": "수입신고할 때 반드시 신고해야 하는 사항의 근거",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "수입식품법20",
+      "영32",
+      "규칙77의6",
+      "환급규칙15",
+      "영257",
+      "영15",
+      "FTA법10",
+      "영16의2",
+      "영176",
+      "법232"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법241",
+      "영246"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    },
+    "bm25": {
+     "retrieved": [
+      "법117",
+      "환급영3",
+      "영34",
+      "영176",
+      "영32",
+      "영29",
+      "규칙57",
+      "영129",
+      "법106의2",
+      "영85"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법241",
+      "영246"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 46,
+   "question": "저가로 신고한 게 의심될 때 세관이 가격을 다시 정하는 방법",
+   "n_gold_covered": 5,
+   "n_gold_strict": 5,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법28",
+      "법37",
+      "법29",
+      "법33",
+      "법30",
+      "규칙7의2",
+      "영31",
+      "법37의2",
+      "규칙7의5",
+      "법38의4"
+     ],
+     "gold_hits": {
+      "법33": 4
+     },
+     "gold_misses": [
+      "법31",
+      "법32",
+      "법34",
+      "법35"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.2,
+     "recall@5_strict": 0.2,
+     "hit@5": true,
+     "recall@10": 0.2,
+     "recall@10_strict": 0.2,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "영6",
+      "규칙7의3",
+      "법28",
+      "규칙3의2",
+      "영24",
+      "법32",
+      "법270의2",
+      "법31",
+      "규칙7의2",
+      "법210"
+     ],
+     "gold_hits": {
+      "법32": 6,
+      "법31": 8
+     },
+     "gold_misses": [
+      "법33",
+      "법34",
+      "법35"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.4,
+     "recall@10_strict": 0.4,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 47,
+   "question": "덤핑으로 들어오는 수입품에 추가로 매기는 관세",
+   "n_gold_covered": 9,
+   "n_gold_strict": 9,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법51",
+      "규칙17",
+      "FTA영33",
+      "영69",
+      "FTA법27",
+      "영65",
+      "법55",
+      "영71의10",
+      "규칙11",
+      "법53"
+     ],
+     "gold_hits": {
+      "법51": 1,
+      "영65": 6
+     },
+     "gold_misses": [
+      "영58",
+      "영59",
+      "영60",
+      "영61",
+      "영62",
+      "영63",
+      "영64"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.1111111111111111,
+     "recall@5_strict": 0.1111111111111111,
+     "hit@5": true,
+     "recall@10": 0.2222222222222222,
+     "recall@10_strict": 0.2222222222222222,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법54",
+      "FTA영11",
+      "FTA영16",
+      "FTA영18",
+      "FTA법21",
+      "법51",
+      "영61",
+      "영63",
+      "대무영33의4",
+      "환급규칙11"
+     ],
+     "gold_hits": {
+      "법51": 6,
+      "영61": 7,
+      "영63": 8
+     },
+     "gold_misses": [
+      "영58",
+      "영59",
+      "영60",
+      "영62",
+      "영64",
+      "영65"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.3333333333333333,
+     "recall@10_strict": 0.3333333333333333,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 48,
+   "question": "특정 물품을 정해진 수량까지만 낮은 세율로 들여오는 제도",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "FTA영3",
+      "환급법19",
+      "법71",
+      "법76",
+      "법89",
+      "규칙58의2",
+      "FTA규칙3",
+      "규칙4",
+      "FTA영22",
+      "법69"
+     ],
+     "gold_hits": {
+      "법71": 3
+     },
+     "gold_misses": [
+      "영92"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법50",
+      "법83",
+      "FTA영3",
+      "영94",
+      "법68",
+      "FTA영30",
+      "법81",
+      "FTA법46",
+      "영97",
+      "법71"
+     ],
+     "gold_hits": {
+      "법71": 10
+     },
+     "gold_misses": [
+      "영92"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    }
+   }
+  },
+  {
+   "id": 49,
+   "question": "보세창고에 넣어둔 물건을 다른 세관 구역으로 옮길 때 절차",
+   "n_gold_covered": 2,
+   "n_gold_strict": 2,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법183",
+      "법213",
+      "규칙72",
+      "법158",
+      "영130",
+      "법177",
+      "영182",
+      "법160",
+      "법106",
+      "영226"
+     ],
+     "gold_hits": {
+      "법213": 2,
+      "영226": 10
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "bm25": {
+     "retrieved": [
+      "법183",
+      "법154",
+      "법197",
+      "영174",
+      "법169",
+      "법182",
+      "법180",
+      "법164",
+      "영258의3",
+      "법200"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법213",
+      "영226"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    }
+   }
+  },
+  {
+   "id": 50,
+   "question": "수입 통관이 끝난 물건을 나중에 다시 심사해서 세액을 고칠 수 있나",
+   "n_gold_covered": 1,
+   "n_gold_strict": 1,
+   "uncovered_laws": [],
+   "arms": {
+    "dense": {
+     "retrieved": [
+      "법106",
+      "규칙8",
+      "법106의2",
+      "FTA법9",
+      "법38의4",
+      "법99",
+      "환급법7",
+      "FTA영26",
+      "영32의4",
+      "영245"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법38의3"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    },
+    "bm25": {
+     "retrieved": [
+      "법38",
+      "법275의2",
+      "영143",
+      "영34",
+      "법38의4",
+      "법42의2",
+      "규칙8",
+      "법259",
+      "법38의3",
+      "법270"
+     ],
+     "gold_hits": {
+      "법38의3": 9
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    }
+   }
+  }
+ ]
+}

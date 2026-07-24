@@ -77,22 +77,32 @@ def test_no_self_loops(gsession):
 
 
 def test_delegates_direction_hi_to_lo(gsession):
-    """DELEGATES 는 항상 상위법령→하위법령(법률→시행령→시행규칙)."""
+    """DELEGATES 는 항상 동일 패밀리 안에서 상위법령→하위법령(법률→시행령→시행규칙)."""
+    from src.ingest.graph import LAW_FAMILY, LAW_RANK
+
     bad = gsession.run(
         """
         MATCH (hi:Article)-[:DELEGATES]->(lo:Article)
-        WITH CASE hi.law_id WHEN '001556' THEN 1 WHEN '002421' THEN 2 ELSE 3 END AS rh,
-             CASE lo.law_id WHEN '001556' THEN 1 WHEN '002421' THEN 2 ELSE 3 END AS rl
-        WHERE rh >= rl RETURN count(*) AS bad
-        """
+        WHERE $fam[hi.law_id] <> $fam[lo.law_id]
+           OR $rank[hi.law_id] >= $rank[lo.law_id]
+        RETURN count(*) AS bad
+        """,
+        fam=LAW_FAMILY, rank=LAW_RANK,
     ).single()["bad"]
     assert bad == 0
 
 
-def test_cites_within_same_law(gsession):
+def test_cites_never_crosses_family_hierarchy(gsession):
+    """CITES 가 동일 패밀리의 위계를 가로지르면 안 됨 (그건 DELEGATES 의 몫)."""
+    from src.ingest.graph import LAW_FAMILY
+
     bad = gsession.run(
-        "MATCH (s:Article)-[:CITES]->(t:Article) WHERE s.law_id <> t.law_id "
-        "RETURN count(*) AS bad"
+        """
+        MATCH (s:Article)-[:CITES]->(t:Article)
+        WHERE s.law_id <> t.law_id AND $fam[s.law_id] = $fam[t.law_id]
+        RETURN count(*) AS bad
+        """,
+        fam=LAW_FAMILY,
     ).single()["bad"]
     assert bad == 0
 

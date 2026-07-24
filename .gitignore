@@ -17,6 +17,9 @@ env/
 # Data caches / large artifacts
 *.npy
 **/data/raw/
+# 법령 본문·MST 캐시는 커밋 (API 쿼터/장애와 무관하게 재적재 가능해야 — Actions ingest 도 이걸 사용)
+!law_repository/data/raw/
+!law_repository/data/raw/**
 
 # OS / editor
 .DS_Store
@@ -32,3 +35,6 @@ Thumbs.db
 # 팀원용 셋업 가이드·배포 문서는 커밋 (*.md 무시의 예외)
 !law_repository/README.md
 !law_repository/deploy/**
+
+# recall 평가 리포트 커밋 (*.md 무시의 예외)
+!law_repository/data/eval/*.md
