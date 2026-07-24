@@ -25,12 +25,28 @@ from src.db.qdrant import BM25_VECTOR, COLLECTION, DENSE_VECTOR, client as qdran
 from src.embed import bm25
 
 TARGET_LAWS = [
+    # 관세 3법 (코어)
     {"law_id": "001556", "name": "관세법"},
     {"law_id": "002421", "name": "관세법 시행령"},
     {"law_id": "006392", "name": "관세법 시행규칙"},
+    # 특례법 2계열 — 기록지 평가에서 미적재로 확인(개선계획 ②a, 법령ID 2026-07-24 API 실측)
+    {"law_id": "010097", "name": "자유무역협정의 이행을 위한 관세법의 특례에 관한 법률"},
+    {"law_id": "010175", "name": "자유무역협정의 이행을 위한 관세법의 특례에 관한 법률 시행령"},
+    {"law_id": "010172", "name": "자유무역협정의 이행을 위한 관세법의 특례에 관한 법률 시행규칙"},
+    {"law_id": "000592", "name": "수출용 원재료에 대한 관세 등 환급에 관한 특례법"},
+    {"law_id": "004043", "name": "수출용 원재료에 대한 관세 등 환급에 관한 특례법 시행령"},
+    {"law_id": "007591", "name": "수출용 원재료에 대한 관세 등 환급에 관한 특례법 시행규칙"},
+    # 무역·통관 개별법 — 골드셋(data/goldset.json) 정답에 등장하는 법령 (개선계획 ②c)
+    {"law_id": "001467", "name": "대외무역법"},
+    {"law_id": "003313", "name": "대외무역법 시행령"},
+    {"law_id": "001513", "name": "식물방역법"},
+    {"law_id": "012247", "name": "수입식품안전관리 특별법"},
+    {"law_id": "001783", "name": "약사법"},
+    {"law_id": "002015", "name": "화장품법"},
+    {"law_id": "001459", "name": "전기용품 및 생활용품 안전관리법"},
 ]
 
-SPLIT_THRESHOLD = 6000  # bge-m3 8192 토큰 대비 여유. 현행 관세 3법 최장 5,325자 → 분할 0건 예상
+SPLIT_THRESHOLD = 6000  # bge-m3 8192 토큰 대비 여유. 관세 3법 최장 5,325자였으나 개별법 추가로 분할 발생 가능(항 단위 분할 경로 사용)
 
 _POINT_NS = uuid.uuid5(uuid.NAMESPACE_URL, "trade-doc-auditor/law-article")
 

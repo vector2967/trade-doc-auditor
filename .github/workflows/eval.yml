@@ -1,0 +1,63 @@
+# 골드셋 recall 평가 (+선택적 신규 법령 초기 적재) — 수동 트리거 전용.
+# delta-sync 는 기존 법령의 '변경'만 동기화하므로, TARGET_LAWS 에 새 법령을
+# 추가했을 때의 초기 적재는 이 워크플로의 ingest=true 로 1회 실행한다.
+# 필요한 Secrets: delta-sync.yml 과 동일.
+name: eval-recall
+
+on:
+  workflow_dispatch:
+    inputs:
+      ingest:
+        description: "평가 전에 TARGET_LAWS 초기 적재 실행 (신규 법령 추가 시 true)"
+        type: boolean
+        default: false
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60   # 초기 적재 시 CPU 임베딩 수십 분
+    defaults:
+      run:
+        working-directory: law_repository
+    env:
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_SSLMODE: require
+      QDRANT_URL: ${{ secrets.QDRANT_URL }}
+      QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
+      NEO4J_URI: ${{ secrets.NEO4J_URI }}
+      NEO4J_USER: ${{ secrets.NEO4J_USER }}
+      NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+      LAW_API_OC: ${{ secrets.LAW_API_OC }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: law_repository/requirements.txt
+
+      - name: Install deps (CPU torch)
+        run: |
+          pip install --quiet torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --quiet -r requirements.txt
+
+      - name: Initial ingest (TARGET_LAWS)
+        if: ${{ inputs.ingest }}
+        run: |
+          python scripts/migrate.py
+          python -m src.ingest.laws --no-cache
+
+      - name: Run recall eval
+        run: python scripts/eval_recall.py
+
+      - name: Summary
+        run: cat data/eval/recall_report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: recall-report
+          path: law_repository/data/eval/

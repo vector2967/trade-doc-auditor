@@ -20,13 +20,18 @@ from datetime import date, datetime
 from src import repository as repo
 from src.db.qdrant import BM25_VECTOR, DENSE_VECTOR
 
-# 법령 별칭 → 법령ID (src.lawgo 관세 3법)
+# 법령 별칭 → 법령ID. 목록은 적재 대상(TARGET_LAWS)에서 파생 — 법령 추가 시 자동 반영.
+from src.ingest.laws import TARGET_LAWS
+
 LAW_ALIAS = {
     "법": "001556", "관세법": "001556",
     "영": "002421", "시행령": "002421",
     "규칙": "006392", "시행규칙": "006392",
+    **{t["name"]: t["law_id"] for t in TARGET_LAWS},
 }
-LAW_NAME = {"001556": "관세법", "002421": "시행령", "006392": "시행규칙"}
+LAW_NAME = {t["law_id"]: t["name"] for t in TARGET_LAWS}
+# 관세 3법은 짧은 표시명 유지 (기존 UI 표기 호환)
+LAW_NAME.update({"001556": "관세법", "002421": "시행령", "006392": "시행규칙"})
 
 
 def _heading(text: str, width: int = 72) -> str:
