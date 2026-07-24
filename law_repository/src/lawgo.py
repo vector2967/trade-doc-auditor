@@ -86,6 +86,21 @@ def fetch_current_law(law_id: str, use_cache: bool = True) -> dict:
     return body
 
 
+def fetch_eflaw_law(mst: str, ef_yd: str, use_cache: bool = True) -> dict:
+    """특정 시행일 버전 본문. target=eflaw + MST + efYd.
+
+    같은 MST(공포단위)가 단계 시행으로 여러 시행일자를 가질 수 있어 efYd 필수
+    (실측: 약사법 MST 279725 가 시행 20260621/20261112 두 단계).
+    """
+    RAW_DIR.mkdir(parents=True, exist_ok=True)
+    cache = RAW_DIR / f"law_eflaw_{mst}_{ef_yd}.json"
+    if use_cache and cache.exists():
+        return json.loads(cache.read_text(encoding="utf-8"))
+    body = get("lawService.do", target="eflaw", MST=mst, efYd=ef_yd)
+    cache.write_text(json.dumps(body, ensure_ascii=False, indent=2), encoding="utf-8")
+    return body
+
+
 def jo_code(no: str | int, branch: str | int = 0) -> int:
     """조문번호+가지번호 → article_no 정수 인코딩 (JO 규약과 동일)."""
     return int(no) * 100 + int(branch or 0)

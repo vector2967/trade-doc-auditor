@@ -57,6 +57,7 @@ TARGET_LAWS = [
 SPLIT_THRESHOLD = 6000  # bge-m3 8192 토큰 대비 여유. 관세 3법 최장 5,325자였으나 개별법 추가로 분할 발생 가능(항 단위 분할 경로 사용)
 
 MST_CACHE = Path("data/raw/law_mst.json")
+EFLAW_INDEX_CACHE = Path("data/raw/law_eflaw_index.json")
 DENSE_CACHE = Path("data/dense_cache.npz")
 
 _POINT_NS = uuid.uuid5(uuid.NAMESPACE_URL, "trade-doc-auditor/law-article")
@@ -272,6 +273,115 @@ def load_law(cur, meta: dict, rows: list[dict]) -> dict:
     return stats
 
 
+# ------------------------------------- 시행 전 법령: 현재 시행 중 버전 병행 적재
+#
+# lawService target=law("현행")는 공포된 최신 버전을 반환하는데, 그 시행일이 미래면
+# 전 조문 is_current=false 로 남아 검색 인덱스에서 통째로 빠진다 (실측: 약사법
+# 시행 2026-11-12, 식물방역법 2026-12-17). 이때 eflaw 목록의 '현행' 항목(현재
+# 시행 중 버전)을 [그 시행일, 미래 시행일) 닫힌 구간 + is_current=true 로 병행
+# 적재한다. 미래 버전 행은 열린 구간 그대로 pre-load — 시행일 도래 시
+# sync.delta.promote() 가 교대시킨다.
+
+def resolve_inforce_version(law_id: str, name: str, use_cache: bool = True) -> dict | None:
+    """eflaw 목록에서 '현행'(현재 시행 중) 버전의 {mst, ef_yd}. 캐시: law_eflaw_index.json."""
+    cached: dict[str, dict] = (
+        json.loads(EFLAW_INDEX_CACHE.read_text(encoding="utf-8"))
+        if EFLAW_INDEX_CACHE.exists() else {}
+    )
+    if use_cache and law_id in cached:
+        return cached[law_id]
+    data = lawgo.get("lawSearch.do", target="eflaw", query=name, display=100)
+    for it in lawgo.as_list(data.get("LawSearch", {}).get("law")):
+        if lawgo.squash(it.get("법령ID")) != law_id:
+            continue
+        if it.get("현행연혁코드") != "현행":
+            continue
+        entry = {
+            "mst": lawgo.squash(it.get("법령일련번호")),
+            "ef_yd": lawgo.squash(it.get("시행일자")),
+        }
+        cached[law_id] = entry
+        EFLAW_INDEX_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        EFLAW_INDEX_CACHE.write_text(
+            json.dumps(cached, ensure_ascii=False, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
+        return entry
+    return None
+
+
+def _insert_inforce_row(cur, law_id: str, mst: str, row: dict, default_valid_to: date,
+                        parent_pk: int | None = None) -> tuple[int | None, str]:
+    """현재 시행 중 버전 행을 미래(열린) 행과 겹치지 않는 닫힌 구간으로 삽입. 멱등."""
+    # 같은 조문의 미래 열린 행 → 그 valid_from 이 이 행의 valid_to (없으면 법령 미래 시행일)
+    cur.execute(
+        """
+        SELECT min(valid_from) FROM law_articles
+        WHERE law_id = %s AND article_no = %s
+          AND paragraph_no IS NOT DISTINCT FROM %s AND item_no IS NULL
+          AND valid_from > %s
+        """,
+        (law_id, row["article_no"], row["paragraph_no"], row["valid_from"]),
+    )
+    hit = cur.fetchone()
+    valid_to = (hit[0] if hit and hit[0] else default_valid_to)
+    if valid_to <= row["valid_from"]:  # 방어: 구간이 비면 스킵
+        return None, "unchanged"
+    # 멱등: 같은 구간 시작의 행이 이미 있으면 스킵
+    cur.execute(
+        """
+        SELECT id FROM law_articles
+        WHERE law_id = %s AND article_no = %s
+          AND paragraph_no IS NOT DISTINCT FROM %s AND item_no IS NULL
+          AND valid_from = %s
+        """,
+        (law_id, row["article_no"], row["paragraph_no"], row["valid_from"]),
+    )
+    if (dup := cur.fetchone()) is not None:
+        return dup[0], "unchanged"
+    is_current = row["valid_from"] <= date.today() < valid_to
+    cur.execute(
+        """
+        INSERT INTO law_articles
+          (law_id, article_no, paragraph_no, title, content, content_hash,
+           version_mst, valid_from, valid_to, is_current, parent_article_pk)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id
+        """,
+        (law_id, row["article_no"], row["paragraph_no"], row["title"],
+         row["content"], _content_hash(row["content"]), mst,
+         row["valid_from"], valid_to, is_current, parent_pk),
+    )
+    return cur.fetchone()[0], "new"
+
+
+def load_inforce_version(law_id: str, name: str, future_enforcement: str,
+                         use_cache: bool = True) -> None:
+    ver = resolve_inforce_version(law_id, name, use_cache=use_cache)
+    if ver is None:
+        print(f"[inforce] {name}: eflaw 목록에서 현행 버전 미발견 — 스킵")
+        return
+    body = lawgo.fetch_eflaw_law(ver["mst"], ver["ef_yd"], use_cache=use_cache)
+    meta = build_meta(body, ver["mst"])
+    assert meta["law_id"] == law_id, f"법령ID 불일치: {meta}"
+    rows = parse_articles(body, meta)
+    default_valid_to = _to_date(future_enforcement)
+    stats = {"new": 0, "unchanged": 0}
+    with connect() as conn, conn.cursor() as cur:
+        upsert_law(cur, meta)
+        for row in rows:
+            pk, status = _insert_inforce_row(cur, law_id, meta["mst"], row, default_valid_to)
+            stats[status] += 1
+            for child in row["children"]:
+                _, cstatus = _insert_inforce_row(
+                    cur, law_id, meta["mst"], child, default_valid_to, parent_pk=pk)
+                stats[cstatus] += 1
+    print(
+        f"[inforce] {meta['law_name']} (MST {meta['mst']}, 시행 {meta['enforcement_date']}"
+        f" → {future_enforcement} 전까지): 조문 {len(rows)} → {stats}"
+    )
+
+
 # ---------------------------------------------------------------- Qdrant 인덱싱
 
 def index_qdrant(batch_size: int = 64) -> int:
@@ -420,6 +530,10 @@ def main(argv: list[str]) -> int:
             f"[pg] {meta['law_name']} (MST {meta['mst']}, 시행 {meta['enforcement_date']}): "
             f"조문 {len(rows)} (분할 {split}) → {stats}"
         )
+        # '현행' 응답이 시행 전 버전이면 현재 시행 중 버전을 병행 적재 (검색 공백 방지)
+        if _to_date(meta["enforcement_date"]) > date.today():
+            load_inforce_version(
+                spec["law_id"], spec["name"], meta["enforcement_date"], use_cache=use_cache)
     if "--skip-embed" not in argv:
         index_qdrant()
     verify()
