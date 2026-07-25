@@ -35,6 +35,8 @@ Thumbs.db
 # 팀원용 셋업 가이드·배포 문서는 커밋 (*.md 무시의 예외)
 !law_repository/README.md
 !law_repository/deploy/**
+# 단, 실비밀 파일은 deploy/** 예외보다 뒤에서 다시 차단 (뒤 규칙이 이김)
+law_repository/deploy/.env.cloud
 
 # recall 평가 리포트 커밋 (*.md 무시의 예외)
 !law_repository/data/eval/*.md
