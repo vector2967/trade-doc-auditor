@@ -1,6 +1,6 @@
 {
  "meta": {
-  "measured_at": "2026-07-25T09:34:07",
+  "measured_at": "2026-07-25T16:08:53",
   "limit": 10,
   "ks": [
    5,
@@ -10,7 +10,8 @@
    "dense",
    "bm25",
    "rrf",
-   "rrf_rerank"
+   "rrf_rerank",
+   "rw_rrf_rerank"
   ],
   "goldset": "data/통관_DB_테스트_기록지.xlsx (Sheet1, 2026-07 수기 평가 47문항)",
   "corpus_laws": [
@@ -67,6 +68,14 @@
     "mean_recall@10": 0.6794917257683215,
     "mean_recall@10_strict": 0.6794917257683215,
     "hit_rate@10": 0.8936170212765957
+   },
+   "rw_rrf_rerank": {
+    "mean_recall@5": 0.6327423167848699,
+    "mean_recall@5_strict": 0.6327423167848699,
+    "hit_rate@5": 0.8936170212765957,
+    "mean_recall@10": 0.7018321513002365,
+    "mean_recall@10_strict": 0.7018321513002365,
+    "hit_rate@10": 0.9148936170212766
    }
   },
   "coverage_gap": {}
@@ -207,6 +216,35 @@
      "recall@10": 0.75,
      "recall@10_strict": 0.75,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "영121",
+      "법241",
+      "법199의2",
+      "법99",
+      "법106",
+      "법106의2",
+      "영124의2",
+      "영123",
+      "FTA법30",
+      "영216의5"
+     ],
+     "gold_hits": {
+      "영121": 1,
+      "법106": 5,
+      "영123": 8
+     },
+     "gold_misses": [
+      "영122"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.75,
+     "recall@10_strict": 0.75,
+     "hit@10": true
     }
    }
   },
@@ -314,6 +352,35 @@
       "법270",
       "영7",
       "영216의5"
+     ],
+     "gold_hits": {
+      "영123": 2,
+      "영121": 3,
+      "법106": 5
+     },
+     "gold_misses": [
+      "영122"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.75,
+     "recall@5_strict": 0.75,
+     "hit@5": true,
+     "recall@10": 0.75,
+     "recall@10_strict": 0.75,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "영124의2",
+      "영123",
+      "영121",
+      "영119",
+      "법106",
+      "법106의2",
+      "법199의2",
+      "법270",
+      "영50",
+      "영7"
      ],
      "gold_hits": {
       "영123": 2,
@@ -452,6 +519,34 @@
      "recall@10": 1.0,
      "recall@10_strict": 1.0,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법107",
+      "영125",
+      "영126",
+      "규칙60",
+      "법19",
+      "대무영59의2",
+      "법105",
+      "규칙59",
+      "영127",
+      "법9"
+     ],
+     "gold_hits": {
+      "법107": 1,
+      "영126": 3,
+      "규칙59": 8,
+      "영127": 9
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
     }
    }
   },
@@ -565,6 +660,33 @@
      "recall@10": 0.0,
      "recall@10_strict": 0.0,
      "hit@10": false
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법38의2",
+      "FTA법14",
+      "법46",
+      "FTA법9",
+      "영34",
+      "영35",
+      "법123",
+      "법38의4",
+      "법21",
+      "영143"
+     ],
+     "gold_hits": {
+      "영34": 5
+     },
+     "gold_misses": [
+      "법38의3"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
     }
    }
   },
@@ -705,6 +827,39 @@
      "recall@10": 0.125,
      "recall@10_strict": 0.125,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법25",
+      "법46",
+      "영123",
+      "영50",
+      "영141의5",
+      "영53",
+      "영271",
+      "영34",
+      "환급영32",
+      "환급영24"
+     ],
+     "gold_hits": {
+      "법46": 2,
+      "영50": 4,
+      "영53": 6
+     },
+     "gold_misses": [
+      "영51",
+      "영52",
+      "영54",
+      "영55",
+      "영56"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.25,
+     "recall@5_strict": 0.25,
+     "hit@5": true,
+     "recall@10": 0.375,
+     "recall@10_strict": 0.375,
+     "hit@10": true
     }
    }
   },
@@ -826,6 +981,34 @@
      "recall@10": 0.3333333333333333,
      "recall@10_strict": 0.3333333333333333,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법200",
+      "영239",
+      "법244",
+      "법150",
+      "법253",
+      "영226",
+      "법157의2",
+      "법252",
+      "영257",
+      "FTA영29"
+     ],
+     "gold_hits": {
+      "법244": 3,
+      "법252": 8
+     },
+     "gold_misses": [
+      "영256"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.3333333333333333,
+     "recall@5_strict": 0.3333333333333333,
+     "hit@5": true,
+     "recall@10": 0.6666666666666666,
+     "recall@10_strict": 0.6666666666666666,
+     "hit@10": true
     }
    }
   },
@@ -926,6 +1109,32 @@
       "법186",
       "영236의2",
       "법141"
+     ],
+     "gold_hits": {
+      "법253": 1,
+      "영257": 4
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법253",
+      "영249",
+      "법252",
+      "영257",
+      "법244",
+      "영202",
+      "법186",
+      "영236의2",
+      "법192",
+      "법27"
      ],
      "gold_hits": {
       "법253": 1,
@@ -1052,6 +1261,32 @@
      "recall@10": 0.0,
      "recall@10_strict": 0.0,
      "hit@10": false
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법241",
+      "법188",
+      "법14",
+      "법93",
+      "규칙48",
+      "FTA영22",
+      "규칙7의6",
+      "법72",
+      "법19",
+      "규칙7의5"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법94",
+      "규칙45"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
     }
    }
   },
@@ -1165,6 +1400,33 @@
      "recall@10": 0.0,
      "recall@10_strict": 0.0,
      "hit@10": false
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "영243",
+      "규칙45",
+      "법14",
+      "FTA규칙30",
+      "규칙37",
+      "규칙50",
+      "법161",
+      "규칙48",
+      "법89",
+      "법99"
+     ],
+     "gold_hits": {
+      "규칙45": 2
+     },
+     "gold_misses": [
+      "법94"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
     }
    }
   },
@@ -1254,6 +1516,32 @@
      "hit@10": true
     },
     "rrf_rerank": {
+     "retrieved": [
+      "규칙48",
+      "법96",
+      "영243",
+      "규칙9",
+      "법81",
+      "규칙50",
+      "법241",
+      "규칙7의3",
+      "법43",
+      "규칙49의2"
+     ],
+     "gold_hits": {
+      "규칙48": 1,
+      "법96": 2
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
      "retrieved": [
       "규칙48",
       "법96",
@@ -1394,6 +1682,33 @@
      "recall@10": 0.5,
      "recall@10_strict": 0.5,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법97",
+      "법99",
+      "법241",
+      "법98",
+      "FTA법30",
+      "법106의2",
+      "규칙50",
+      "법106",
+      "환급규칙2",
+      "법269"
+     ],
+     "gold_hits": {
+      "법99": 2
+     },
+     "gold_misses": [
+      "규칙54"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
     }
    }
   },
@@ -1514,6 +1829,33 @@
      "recall@10": 1.0,
      "recall@10_strict": 1.0,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법99",
+      "영115",
+      "규칙54",
+      "규칙50",
+      "규칙45",
+      "환급규칙2",
+      "FTA규칙30",
+      "법93",
+      "법97",
+      "규칙48"
+     ],
+     "gold_hits": {
+      "영115": 2,
+      "규칙50": 4,
+      "법97": 9
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
     }
    }
   },
@@ -1606,6 +1948,33 @@
      "hit@10": true
     },
     "rrf_rerank": {
+     "retrieved": [
+      "법28",
+      "영16",
+      "영6",
+      "법27",
+      "규칙3",
+      "규칙3의2",
+      "영15",
+      "법37",
+      "법16",
+      "규칙2"
+     ],
+     "gold_hits": {
+      "법28": 1,
+      "영16": 2,
+      "규칙3": 5
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
      "retrieved": [
       "법28",
       "영16",
@@ -1760,6 +2129,36 @@
      "recall@10": 0.8,
      "recall@10_strict": 0.8,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "대무법38",
+      "법230",
+      "대무영60의2",
+      "대무법33",
+      "FTA영45",
+      "FTA규칙24",
+      "FTA규칙10",
+      "FTA영47",
+      "대무법33의2",
+      "대무영58"
+     ],
+     "gold_hits": {
+      "대무법38": 1,
+      "법230": 2,
+      "대무법33": 4,
+      "대무법33의2": 9
+     },
+     "gold_misses": [
+      "대무법34"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.6,
+     "recall@5_strict": 0.6,
+     "hit@5": true,
+     "recall@10": 0.8,
+     "recall@10_strict": 0.8,
+     "hit@10": true
     }
    }
   },
@@ -1860,6 +2259,33 @@
       "법89",
       "법178",
       "법241"
+     ],
+     "gold_hits": {
+      "법235": 2
+     },
+     "gold_misses": [
+      "영243"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법231",
+      "법235",
+      "법230의2",
+      "법230",
+      "법270",
+      "법235의2",
+      "법236",
+      "영238",
+      "영239",
+      "법237"
      ],
      "gold_hits": {
       "법235": 2
@@ -1987,6 +2413,32 @@
      "recall@10": 1.0,
      "recall@10_strict": 1.0,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법226",
+      "영233",
+      "영251",
+      "규칙77의6",
+      "법257",
+      "법151",
+      "영242",
+      "법161",
+      "법186",
+      "법246"
+     ],
+     "gold_hits": {
+      "법226": 1,
+      "영233": 2
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
     }
    }
   },
@@ -2091,6 +2543,33 @@
       "식물방역법29",
       "식물방역법13",
       "FTA규칙24",
+      "식물방역법19"
+     ],
+     "gold_hits": {
+      "식물방역법12": 1
+     },
+     "gold_misses": [
+      "법226"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "식물방역법12",
+      "영233",
+      "식물방역법26",
+      "식물방역법28의4",
+      "식물방역법28",
+      "식물방역법28의2",
+      "식물방역법30",
+      "식물방역법29",
+      "식물방역법13",
       "식물방역법19"
      ],
      "gold_hits": {
@@ -2230,6 +2709,35 @@
      "recall@10": 0.5,
      "recall@10_strict": 0.5,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "수입식품법21",
+      "수입식품법3",
+      "수입식품법20",
+      "수입식품법22",
+      "수입식품법39",
+      "수입식품법24",
+      "수입식품법38",
+      "수입식품법6",
+      "수입식품법18",
+      "수입식품법25"
+     ],
+     "gold_hits": {
+      "수입식품법21": 1,
+      "수입식품법20": 3
+     },
+     "gold_misses": [
+      "법226",
+      "수입식품법15"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
     }
    }
   },
@@ -2349,6 +2857,34 @@
      "recall@10": 0.6666666666666666,
      "recall@10_strict": 0.6666666666666666,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "영236",
+      "규칙76",
+      "FTA규칙5",
+      "FTA법7",
+      "FTA규칙10의2",
+      "FTA규칙24",
+      "FTA규칙7",
+      "FTA규칙10",
+      "FTA규칙8",
+      "FTA규칙15"
+     ],
+     "gold_hits": {
+      "규칙76": 2,
+      "FTA법7": 4
+     },
+     "gold_misses": [
+      "FTA법5"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 0.6666666666666666,
+     "recall@10_strict": 0.6666666666666666,
+     "hit@10": true
     }
    }
   },
@@ -2449,6 +2985,32 @@
       "FTA법35의2",
       "FTA영49",
       "영245의4"
+     ],
+     "gold_hits": {
+      "FTA법9": 1,
+      "FTA영5": 2
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "FTA법9",
+      "FTA영5",
+      "FTA영4",
+      "FTA영23",
+      "FTA영46",
+      "FTA영18",
+      "FTA영2",
+      "FTA영17",
+      "FTA법8",
+      "FTA법35"
      ],
      "gold_hits": {
       "FTA법9": 1,
@@ -2576,6 +3138,32 @@
      "recall@10": 1.0,
      "recall@10_strict": 1.0,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "규칙48의2",
+      "법241",
+      "법96",
+      "법88",
+      "법17",
+      "법93",
+      "영256",
+      "환급법18",
+      "법16",
+      "법101"
+     ],
+     "gold_hits": {
+      "규칙48의2": 1,
+      "법96": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
     }
    }
   },
@@ -2678,6 +3266,33 @@
       "규칙50",
       "법92",
       "법89",
+      "법95",
+      "규칙54",
+      "영120"
+     ],
+     "gold_hits": {
+      "법90": 1,
+      "규칙37": 2,
+      "규칙38": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법90",
+      "규칙37",
+      "규칙38",
+      "규칙50",
+      "법92",
+      "법89",
+      "법93",
       "법95",
       "규칙54",
       "영120"
@@ -2812,6 +3427,33 @@
      "recall@10": 1.0,
      "recall@10_strict": 1.0,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법91",
+      "규칙79의4",
+      "규칙40",
+      "규칙39",
+      "영32의4",
+      "법92",
+      "규칙38",
+      "법107",
+      "규칙44",
+      "법93"
+     ],
+     "gold_hits": {
+      "법91": 1,
+      "규칙40": 3,
+      "규칙39": 4
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
     }
    }
   },
@@ -2907,6 +3549,34 @@
      "hit@10": true
     },
     "rrf_rerank": {
+     "retrieved": [
+      "법88",
+      "규칙34",
+      "규칙48의2",
+      "법92",
+      "FTA법30",
+      "법99",
+      "규칙45",
+      "FTA규칙30",
+      "규칙49",
+      "규칙54"
+     ],
+     "gold_hits": {
+      "법88": 1,
+      "규칙34": 2
+     },
+     "gold_misses": [
+      "영108"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 0.6666666666666666,
+     "recall@10_strict": 0.6666666666666666,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
      "retrieved": [
       "법88",
       "규칙34",
@@ -3058,6 +3728,35 @@
      "recall@10": 0.75,
      "recall@10_strict": 0.75,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "영119",
+      "규칙56",
+      "법99",
+      "법241",
+      "규칙7의6",
+      "법33",
+      "환급규칙2",
+      "규칙57",
+      "법98",
+      "규칙50"
+     ],
+     "gold_hits": {
+      "영119": 1,
+      "규칙56": 2,
+      "규칙57": 8
+     },
+     "gold_misses": [
+      "법101"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.75,
+     "recall@10_strict": 0.75,
+     "hit@10": true
     }
    }
   },
@@ -3185,6 +3884,36 @@
      "hit@5": false,
      "recall@10": 0.4,
      "recall@10_strict": 0.4,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법249",
+      "약사법76",
+      "법276",
+      "약사법24의3",
+      "수입식품법20",
+      "법241",
+      "법248",
+      "법250",
+      "화장품법24",
+      "영152"
+     ],
+     "gold_hits": {
+      "법250": 8
+     },
+     "gold_misses": [
+      "법38의2",
+      "법38의3",
+      "영253",
+      "영254"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.2,
+     "recall@10_strict": 0.2,
      "hit@10": true
     }
    }
@@ -3327,6 +4056,39 @@
      "recall@10": 0.25,
      "recall@10_strict": 0.25,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법30",
+      "규칙10",
+      "영18의2",
+      "규칙3",
+      "영22",
+      "법35",
+      "영31",
+      "영15",
+      "법32",
+      "영29"
+     ],
+     "gold_hits": {
+      "법30": 1,
+      "영22": 5
+     },
+     "gold_misses": [
+      "영17",
+      "영18",
+      "영19",
+      "영20",
+      "영21",
+      "영23"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.25,
+     "recall@5_strict": 0.25,
+     "hit@5": true,
+     "recall@10": 0.25,
+     "recall@10_strict": 0.25,
+     "hit@10": true
     }
    }
   },
@@ -3431,6 +4193,33 @@
       "영15",
       "규칙73의2",
       "법42"
+     ],
+     "gold_hits": {
+      "영20": 2,
+      "법30": 4,
+      "법34": 5
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "규칙4의3",
+      "영20",
+      "법270의2",
+      "법30",
+      "법34",
+      "영119",
+      "영246",
+      "법33",
+      "영15",
+      "규칙73의2"
      ],
      "gold_hits": {
       "영20": 2,
@@ -3565,6 +4354,34 @@
      "recall@10": 0.6666666666666666,
      "recall@10_strict": 0.6666666666666666,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법81",
+      "영30",
+      "법94",
+      "FTA영22",
+      "규칙45",
+      "FTA영2",
+      "법71",
+      "영95",
+      "법96",
+      "법69"
+     ],
+     "gold_hits": {
+      "법81": 1
+     },
+     "gold_misses": [
+      "영96",
+      "규칙7"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.3333333333333333,
+     "recall@5_strict": 0.3333333333333333,
+     "hit@5": true,
+     "recall@10": 0.3333333333333333,
+     "recall@10_strict": 0.3333333333333333,
+     "hit@10": true
     }
    }
   },
@@ -3662,6 +4479,31 @@
       "법107",
       "법71",
       "법30"
+     ],
+     "gold_hits": {
+      "법82": 1
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법82",
+      "법81",
+      "FTA영22",
+      "영95",
+      "영34",
+      "FTA영3",
+      "법71",
+      "영204",
+      "법9",
+      "법50"
      ],
      "gold_hits": {
       "법82": 1
@@ -3792,6 +4634,33 @@
      "recall@10": 1.0,
      "recall@10_strict": 1.0,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법92",
+      "규칙41",
+      "규칙42",
+      "법88",
+      "규칙34",
+      "법93",
+      "규칙37",
+      "FTA규칙30",
+      "법107",
+      "법89"
+     ],
+     "gold_hits": {
+      "법92": 1,
+      "규칙41": 2,
+      "규칙42": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
     }
    }
   },
@@ -3884,6 +4753,33 @@
      "hit@10": true
     },
     "rrf_rerank": {
+     "retrieved": [
+      "법91",
+      "규칙40",
+      "FTA규칙30",
+      "법93",
+      "규칙39",
+      "법92",
+      "규칙43",
+      "법96",
+      "FTA법30",
+      "규칙50"
+     ],
+     "gold_hits": {
+      "법91": 1,
+      "규칙40": 2,
+      "규칙39": 5
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
      "retrieved": [
       "법91",
       "규칙40",
@@ -4018,6 +4914,31 @@
      "recall@10": 1.0,
      "recall@10_strict": 1.0,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "대무법19의2",
+      "대무법19의5",
+      "대무영33",
+      "대무법19의6",
+      "대무영33의6",
+      "대무영33의4",
+      "대무법19의3",
+      "대무법19",
+      "대무영33의2",
+      "대무법19의4"
+     ],
+     "gold_hits": {
+      "대무법19의2": 1
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
     }
    }
   },
@@ -4110,6 +5031,33 @@
      "hit@10": true
     },
     "rrf_rerank": {
+     "retrieved": [
+      "대무영56",
+      "대무법33",
+      "대무영55",
+      "대무영57",
+      "규칙74",
+      "법230",
+      "법229",
+      "FTA법7",
+      "대무법33의2",
+      "영236"
+     ],
+     "gold_hits": {
+      "대무영56": 1,
+      "대무법33": 2,
+      "대무영55": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
      "retrieved": [
       "대무영56",
       "대무법33",
@@ -4255,6 +5203,34 @@
      "recall@10": 0.3333333333333333,
      "recall@10_strict": 0.3333333333333333,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "약사법42",
+      "약사법31",
+      "약사법35",
+      "약사법63",
+      "약사법50의7",
+      "약사법53",
+      "대무영33의2",
+      "화장품법2",
+      "화장품법23",
+      "화장품법15"
+     ],
+     "gold_hits": {
+      "약사법42": 1
+     },
+     "gold_misses": [
+      "법226",
+      "화장품법3"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.3333333333333333,
+     "recall@5_strict": 0.3333333333333333,
+     "hit@5": true,
+     "recall@10": 0.3333333333333333,
+     "recall@10_strict": 0.3333333333333333,
+     "hit@10": true
     }
    }
   },
@@ -4347,6 +5323,33 @@
      "hit@10": true
     },
     "rrf_rerank": {
+     "retrieved": [
+      "전기용품법8",
+      "전기용품법5",
+      "전기용품법9",
+      "전기용품법6",
+      "전기용품법10",
+      "전기용품법2",
+      "전기용품법17",
+      "전기용품법38",
+      "전기용품법49",
+      "전기용품법11"
+     ],
+     "gold_hits": {
+      "전기용품법5": 2
+     },
+     "gold_misses": [
+      "법226"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
      "retrieved": [
       "전기용품법8",
       "전기용품법5",
@@ -4491,6 +5494,33 @@
      "recall@10": 1.0,
      "recall@10_strict": 1.0,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "환급법21",
+      "법28",
+      "영16",
+      "환급법16",
+      "영56",
+      "규칙3",
+      "영6",
+      "영83",
+      "영67",
+      "환급법7"
+     ],
+     "gold_hits": {
+      "법28": 2,
+      "영16": 3,
+      "규칙3": 6
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.6666666666666666,
+     "recall@5_strict": 0.6666666666666666,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
     }
    }
   },
@@ -4577,6 +5607,31 @@
      "hit@10": true
     },
     "rrf_rerank": {
+     "retrieved": [
+      "법246",
+      "법265의2",
+      "법265",
+      "영251",
+      "법110의3",
+      "법246의3",
+      "영259의6",
+      "법300",
+      "영259의2",
+      "영251의2"
+     ],
+     "gold_hits": {
+      "법246": 1
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
      "retrieved": [
       "법246",
       "법265의2",
@@ -4717,6 +5772,33 @@
      "recall@10": 1.0,
      "recall@10_strict": 1.0,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법95",
+      "규칙46",
+      "법92",
+      "규칙47",
+      "법101",
+      "규칙41",
+      "규칙37",
+      "법93",
+      "법103",
+      "FTA규칙30"
+     ],
+     "gold_hits": {
+      "법95": 1,
+      "규칙46": 2,
+      "규칙47": 4
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
     }
    }
   },
@@ -4809,6 +5891,33 @@
      "hit@10": true
     },
     "rrf_rerank": {
+     "retrieved": [
+      "영124의2",
+      "법106의2",
+      "규칙58의2",
+      "영7",
+      "법106",
+      "환급법9",
+      "법99",
+      "영121",
+      "환급법3",
+      "FTA법30"
+     ],
+     "gold_hits": {
+      "영124의2": 1,
+      "법106의2": 2,
+      "규칙58의2": 3
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
+    },
+    "rw_rrf_rerank": {
      "retrieved": [
       "영124의2",
       "법106의2",
@@ -4948,6 +6057,32 @@
      "recall@10": 1.0,
      "recall@10_strict": 1.0,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법252",
+      "법253",
+      "법248",
+      "영256",
+      "법9",
+      "법244",
+      "영131",
+      "영257",
+      "법157의2",
+      "법238"
+     ],
+     "gold_hits": {
+      "법252": 1,
+      "영256": 4
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 1.0,
+     "recall@5_strict": 1.0,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
     }
    }
   },
@@ -5062,6 +6197,32 @@
      "recall@10": 0.5,
      "recall@10_strict": 0.5,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "영32",
+      "법27",
+      "법38",
+      "영249",
+      "수입식품법20",
+      "영15",
+      "환급규칙15",
+      "법245",
+      "영97",
+      "영257"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법241",
+      "영246"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
     }
    }
   },
@@ -5173,6 +6334,35 @@
       "법27",
       "법38의4",
       "규칙3의2",
+      "영15"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법31",
+      "법32",
+      "법33",
+      "법34",
+      "법35"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법28",
+      "영16",
+      "법30",
+      "영24",
+      "규칙3",
+      "영34",
+      "법37",
+      "법27",
+      "법38의4",
       "영15"
      ],
      "gold_hits": {},
@@ -5335,6 +6525,40 @@
      "recall@10": 0.4444444444444444,
      "recall@10_strict": 0.4444444444444444,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법51",
+      "FTA영33",
+      "규칙17",
+      "영65",
+      "영69",
+      "영59",
+      "법53",
+      "법56의2",
+      "영61",
+      "영67"
+     ],
+     "gold_hits": {
+      "법51": 1,
+      "영65": 4,
+      "영59": 6,
+      "영61": 9
+     },
+     "gold_misses": [
+      "영58",
+      "영60",
+      "영62",
+      "영63",
+      "영64"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.2222222222222222,
+     "recall@5_strict": 0.2222222222222222,
+     "hit@5": true,
+     "recall@10": 0.4444444444444444,
+     "recall@10_strict": 0.4444444444444444,
+     "hit@10": true
     }
    }
   },
@@ -5452,6 +6676,32 @@
      "recall@10": 0.5,
      "recall@10_strict": 0.5,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "FTA영3",
+      "FTA영30",
+      "FTA영22",
+      "법71",
+      "법83",
+      "법76",
+      "영95",
+      "FTA규칙3",
+      "영92",
+      "FTA법22"
+     ],
+     "gold_hits": {
+      "법71": 4,
+      "영92": 9
+     },
+     "gold_misses": [],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 1.0,
+     "recall@10_strict": 1.0,
+     "hit@10": true
     }
    }
   },
@@ -5567,6 +6817,33 @@
      "recall@10": 0.5,
      "recall@10_strict": 0.5,
      "hit@10": true
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "규칙72",
+      "영226",
+      "법199",
+      "법254의2",
+      "법164",
+      "법183",
+      "법200",
+      "법177",
+      "영182",
+      "법215"
+     ],
+     "gold_hits": {
+      "영226": 2
+     },
+     "gold_misses": [
+      "법213"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.5,
+     "recall@5_strict": 0.5,
+     "hit@5": true,
+     "recall@10": 0.5,
+     "recall@10_strict": 0.5,
+     "hit@10": true
     }
    }
   },
@@ -5664,6 +6941,31 @@
       "법42의2",
       "법38의4",
       "법270"
+     ],
+     "gold_hits": {},
+     "gold_misses": [
+      "법38의3"
+     ],
+     "optional_hits": {},
+     "recall@5": 0.0,
+     "recall@5_strict": 0.0,
+     "hit@5": false,
+     "recall@10": 0.0,
+     "recall@10_strict": 0.0,
+     "hit@10": false
+    },
+    "rw_rrf_rerank": {
+     "retrieved": [
+      "법38",
+      "FTA법9",
+      "법118",
+      "영34",
+      "규칙8",
+      "영32의4",
+      "법42의2",
+      "법38의4",
+      "법270",
+      "FTA영22"
      ],
      "gold_hits": {},
      "gold_misses": [

@@ -28,15 +28,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # agent 레이어(
 from src import repository as repo  # noqa: E402
 from src.db.postgres import connect  # noqa: E402
 
-# 융합/rerank 는 에이전트 레이어 소유 — arm 이름으로 디스패치
-AGENT_ARMS = ("rrf", "rrf_rerank")
+# 융합/rerank/재작성은 에이전트 레이어 소유 — arm 이름으로 디스패치
+AGENT_ARMS = ("rrf", "rrf_rerank", "rw_rrf_rerank")
 
 
 def run_search(question: str, arm: str, depth: int):
     if arm in AGENT_ARMS:
         from agent import retrieval
 
-        return retrieval.search(question, limit=depth, use_rerank=(arm == "rrf_rerank"))
+        return retrieval.search(
+            question, limit=depth,
+            use_rerank=arm.endswith("rerank"),
+            use_rewrite=arm.startswith("rw_"),
+        )
     return repo.search(question, arm=arm, limit=depth)
 
 # 리포트 표시용 축약 (없으면 원명 그대로)
@@ -283,7 +287,8 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=10, help="arm 당 검색 depth")
     ap.add_argument("--k", type=int, nargs="+", default=[5, 10])
     ap.add_argument("--arms", nargs="+", default=["dense", "bm25", "rrf"],
-                    help="dense|bm25|rrf|rrf_rerank (rrf_rerank 는 reranker 모델 필요)")
+                    help="dense|bm25|rrf|rrf_rerank|rw_rrf_rerank "
+                         "(rerank 계열은 bge-reranker 모델 필요, rw_=쿼리재작성)")
     ap.add_argument("--out-dir", default="data/eval")
     args = ap.parse_args()
 

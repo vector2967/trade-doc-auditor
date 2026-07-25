@@ -22,15 +22,18 @@ from src import repository as repo  # noqa: E402
 
 RRF_K = 60          # 표준값 — 상위권 순위 차의 영향을 완만하게
 ARMS = ("dense", "bm25")
+VARIANT_WEIGHT = 0.6  # 재작성 변형 쿼리의 RRF 가중 (원 쿼리 1.0 대비)
 
 
-def rrf_fuse(ranklists: dict[str, list[repo.Hit]], limit: int) -> list[repo.Hit]:
-    """arm 별 순위 리스트 → RRF 점수로 융합한 상위 limit. 점수 = Σ 1/(k+rank)."""
+def rrf_fuse(ranklists: dict[str, list[repo.Hit]], limit: int,
+             weights: dict[str, float] | None = None) -> list[repo.Hit]:
+    """arm 별 순위 리스트 → RRF 점수로 융합한 상위 limit. 점수 = Σ w/(k+rank)."""
     scores: dict[int, float] = {}
     first: dict[int, repo.Hit] = {}
-    for hits in ranklists.values():
+    for key, hits in ranklists.items():
+        w = (weights or {}).get(key, 1.0)
         for rank, h in enumerate(hits, start=1):
-            scores[h.article_pk] = scores.get(h.article_pk, 0.0) + 1.0 / (RRF_K + rank)
+            scores[h.article_pk] = scores.get(h.article_pk, 0.0) + w / (RRF_K + rank)
             first.setdefault(h.article_pk, h)
     order = sorted(scores, key=lambda pk: (-scores[pk], pk))[:limit]
     return [repo.Hit(pk, scores[pk], first[pk].text) for pk in order]
@@ -76,11 +79,26 @@ def rerank(query: str, hits: list[repo.Hit], limit: int,
 
 
 def search(query: str, limit: int = 10, depth: int = 30,
-           use_rerank: bool = True, as_of=None) -> list[repo.Hit]:
-    """dense+bm25 융합 검색. depth = arm 당 회수/rerank 후보 폭."""
-    ranklists = {arm: repo.search(query, arm=arm, limit=depth, as_of=as_of)
-                 for arm in ARMS}
-    fused = rrf_fuse(ranklists, limit=depth)
+           use_rerank: bool = True, use_rewrite: bool = False,
+           as_of=None) -> list[repo.Hit]:
+    """dense+bm25 융합 검색. depth = arm 당 회수/rerank 후보 폭.
+
+    use_rewrite=True 면 쿼리 재작성(개선계획 ④) 변형들도 arm 별로 검색해
+    가중 RRF 로 함께 융합한다. rerank 는 항상 원 쿼리 기준.
+    """
+    queries = [query]
+    if use_rewrite:
+        from agent import query_rewrite
+
+        queries += query_rewrite.rewrite(query)
+    ranklists: dict[str, list[repo.Hit]] = {}
+    weights: dict[str, float] = {}
+    for i, q in enumerate(queries):
+        for arm in ARMS:
+            key = f"{arm}:{i}"
+            ranklists[key] = repo.search(q, arm=arm, limit=depth, as_of=as_of)
+            weights[key] = 1.0 if i == 0 else VARIANT_WEIGHT
+    fused = rrf_fuse(ranklists, limit=depth, weights=weights)
     if use_rerank:
         return rerank(query, fused, limit)
     return fused[:limit]
