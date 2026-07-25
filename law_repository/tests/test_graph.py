@@ -76,10 +76,17 @@ def test_no_self_loops(gsession):
     assert bad == 0
 
 
+def _graph_family_maps(gsession):
+    from src.ingest.graph import family_maps
+
+    law_ids = [r["lid"] for r in gsession.run(
+        "MATCH (a:Article) RETURN DISTINCT a.law_id AS lid")]
+    return family_maps(law_ids)
+
+
 def test_delegates_direction_hi_to_lo(gsession):
     """DELEGATES 는 항상 동일 패밀리 안에서 상위법령→하위법령(법률→시행령→시행규칙)."""
-    from src.ingest.graph import LAW_FAMILY, LAW_RANK
-
+    fam, rank = _graph_family_maps(gsession)
     bad = gsession.run(
         """
         MATCH (hi:Article)-[:DELEGATES]->(lo:Article)
@@ -87,22 +94,21 @@ def test_delegates_direction_hi_to_lo(gsession):
            OR $rank[hi.law_id] >= $rank[lo.law_id]
         RETURN count(*) AS bad
         """,
-        fam=LAW_FAMILY, rank=LAW_RANK,
+        fam=fam, rank=rank,
     ).single()["bad"]
     assert bad == 0
 
 
 def test_cites_never_crosses_family_hierarchy(gsession):
     """CITES 가 동일 패밀리의 위계를 가로지르면 안 됨 (그건 DELEGATES 의 몫)."""
-    from src.ingest.graph import LAW_FAMILY
-
+    fam, _ = _graph_family_maps(gsession)
     bad = gsession.run(
         """
         MATCH (s:Article)-[:CITES]->(t:Article)
         WHERE s.law_id <> t.law_id AND $fam[s.law_id] = $fam[t.law_id]
         RETURN count(*) AS bad
         """,
-        fam=LAW_FAMILY,
+        fam=fam,
     ).single()["bad"]
     assert bad == 0
 

@@ -52,6 +52,21 @@ FAMILIES = {
 LAW_RANK = {law_id: rank for fam in FAMILIES.values() for rank, law_id in fam.items()}
 LAW_FAMILY = {law_id: name for name, fam in FAMILIES.items() for law_id in fam.values()}
 
+
+def family_of(law_id: str) -> str:
+    """FAMILIES 미등록 법령(특수물자 개별법 등)은 자기 자신이 단독 패밀리(법률)."""
+    return LAW_FAMILY.get(law_id, law_id)
+
+
+def rank_of(law_id: str) -> int:
+    return LAW_RANK.get(law_id, 1)
+
+
+def family_maps(law_ids) -> tuple[dict[str, str], dict[str, int]]:
+    """Cypher 파라미터용 전체 (family, rank) 맵 — 미등록 법령 포함."""
+    ids = set(law_ids) | set(LAW_FAMILY)
+    return ({lid: family_of(lid) for lid in ids}, {lid: rank_of(lid) for lid in ids})
+
 # 본문에 등장하는 법령명 → 패밀리. 긴 이름 먼저 매칭(endswith).
 _NAMED_FAMILY = [
     ("수입식품안전관리특별법", "수입식품특별법"),
@@ -87,8 +102,8 @@ def _resolve_qualifier(q: str | None, source_law_id: str) -> str | None:
     for name, fam in _NAMED_FAMILY:
         if qn.endswith(name):
             return FAMILIES[fam].get(rank)
-    # bare 법/영/규칙 → 출발 조문의 패밀리 내 위계로 해석
-    src_fam = FAMILIES[LAW_FAMILY[source_law_id]]
+    # bare 법/영/규칙 → 출발 조문의 패밀리 내 위계로 해석 (미등록 법령은 자기 자신=법률만)
+    src_fam = FAMILIES.get(family_of(source_law_id), {1: source_law_id})
     if qn in ("규칙", ""):  # ""=시행규칙/시행령 단독(위에서 접미 제거됨)
         return src_fam.get(rank if rank > 1 else 3)
     if qn == "영":
@@ -181,10 +196,10 @@ def build(keep: bool = False, nodes: bool = True, edges: bool = True) -> None:
                         t_pk = pk_by_key.get((t_law, t_art))
                         if t_pk is None:  # 대상 조문이 현행 노드에 없음(폐지/미적재)
                             continue
-                        if LAW_FAMILY[law_id] != LAW_FAMILY[t_law] or law_id == t_law:
+                        if family_of(law_id) != family_of(t_law) or law_id == t_law:
                             cites.append({"s": pk, "t": t_pk, "basis": basis})
                         else:  # 동일 패밀리 위계 교차 → 상위→하위 위임
-                            hi, lo = (pk, t_pk) if LAW_RANK[law_id] < LAW_RANK[t_law] else (t_pk, pk)
+                            hi, lo = (pk, t_pk) if rank_of(law_id) < rank_of(t_law) else (t_pk, pk)
                             delegates.append({"s": hi, "t": lo, "basis": basis})
                 _write_edges(s, "CITES", _dedupe(cites))
                 _write_edges(s, "DELEGATES", _dedupe(delegates))
@@ -221,6 +236,9 @@ def verify() -> None:
             d = s.run("MATCH ()-[e:DELEGATES]->() RETURN count(e) AS c").single()["c"]
             print(f"[verify] :Article {n} | CITES {c} | DELEGATES {d}")
             # 위임 방향 불변식: 동일 패밀리 + 시작이 끝보다 상위 위계여야
+            law_ids = [r["lid"] for r in s.run(
+                "MATCH (a:Article) RETURN DISTINCT a.law_id AS lid")]
+            fam, rank = family_maps(law_ids)
             bad = s.run(
                 """
                 MATCH (hi:Article)-[:DELEGATES]->(lo:Article)
@@ -228,7 +246,7 @@ def verify() -> None:
                    OR $rank[hi.law_id] >= $rank[lo.law_id]
                 RETURN count(*) AS bad
                 """,
-                fam=LAW_FAMILY, rank=LAW_RANK,
+                fam=fam, rank=rank,
             ).single()["bad"]
             print(f"[verify] DELEGATES 방향 위반(상위→하위 아님): {bad}")
             print("\n[sample] 관세법 제226조가 위임한 하위 조문:")

@@ -17,7 +17,7 @@ import pytest
 
 from src import repository as repo
 from src.db.qdrant import COLLECTION
-from src.ingest.graph import LAW_FAMILY, LAW_RANK
+from src.ingest.graph import family_maps
 
 # 조문 identity (설계 §4.1 EXCLUDE 키와 동일)
 _KEY = "law_id, article_no, paragraph_no, item_no"
@@ -255,13 +255,16 @@ def test_graph_edge_invariants(neo):
         ).single()["c"]
         assert loops == 0
 
+        law_ids = [r["lid"] for r in s.run(
+            "MATCH (a:Article) RETURN DISTINCT a.law_id AS lid")]
+        fam, rank = family_maps(law_ids)
         bad_cites = s.run(
             """
             MATCH (s:Article)-[:CITES]->(t:Article)
             WHERE s.law_id <> t.law_id AND $fam[s.law_id] = $fam[t.law_id]
             RETURN count(*) AS c
             """,
-            fam=LAW_FAMILY,
+            fam=fam,
         ).single()["c"]
         assert bad_cites == 0, "CITES 가 동일 패밀리 위계를 넘음 (DELEGATES 여야 함)"
 
@@ -270,10 +273,10 @@ def test_graph_edge_invariants(neo):
             "RETURN DISTINCT s.law_id AS s, t.law_id AS t"
         ))
     for r in pairs:
-        assert LAW_FAMILY[r["s"]] == LAW_FAMILY[r["t"]], \
+        assert fam[r["s"]] == fam[r["t"]], \
             f"DELEGATES 가 패밀리 경계를 넘음: {r['s']} → {r['t']}"
-        assert LAW_RANK[r["s"]] < LAW_RANK[r["t"]], \
-            f"DELEGATES 방향 위반: {r['s']}(rank {LAW_RANK[r['s']]}) → {r['t']}"
+        assert rank[r["s"]] < rank[r["t"]], \
+            f"DELEGATES 방향 위반: {r['s']}(rank {rank[r['s']]}) → {r['t']}"
 
 
 # ------------------------------------------------- D. HSK 상속 누락 체크
