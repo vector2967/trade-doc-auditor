@@ -124,6 +124,8 @@ def evaluate(goldset: dict, arms: list[str], ks: list[int], limit: int) -> dict:
     # 1) 검색 (arm × 질문) — pk 수집
     searches: dict[tuple[int, str], list] = {}
     all_pks: set[int] = set()
+    n_scored = sum(1 for q in questions if not q.get("skip"))
+    done = 0
     for q in questions:
         if q.get("skip"):
             skipped.append({"id": q["id"], "reason": q.get("skip_reason", "")})
@@ -132,6 +134,9 @@ def evaluate(goldset: dict, arms: list[str], ks: list[int], limit: int) -> dict:
             hits = run_search(q["question"], arm, depth)
             searches[(q["id"], arm)] = hits
             all_pks.update(h.article_pk for h in hits)
+        done += 1
+        # 장기 실행(CPU rerank) 진행 확인용 — flush 로 파이프/리다이렉트에도 즉시 반영
+        print(f"[eval] {done}/{n_scored} #{q['id']} 완료", flush=True)
     pk_map = resolve_pks(sorted(all_pks))
 
     # 2) 채점

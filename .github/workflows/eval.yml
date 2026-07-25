@@ -11,6 +11,10 @@ on:
         description: "평가 전에 TARGET_LAWS 초기 적재 실행 (신규 법령 추가 시 true)"
         type: boolean
         default: false
+      reindex:
+        description: "Qdrant 전량 재인덱싱 (BM25 토크나이저 등 인코더 변경 시 true)"
+        type: boolean
+        default: false
 
 jobs:
   eval:
@@ -52,6 +56,11 @@ jobs:
         run: |
           python scripts/migrate.py
           python -m src.ingest.laws
+
+      - name: Reindex Qdrant (encoder change)
+        if: ${{ inputs.reindex }}
+        # dense 는 커밋된 캐시 전량 히트라 추론 없음 — sparse(BM25)만 재계산
+        run: python scripts/reindex_qdrant.py
 
       - name: Run recall eval
         run: python scripts/eval_recall.py
