@@ -51,6 +51,11 @@ _REQUIREMENT_TRIGGER = re.compile(
 )
 _REQUIREMENT_ANCHOR = "관세법 제226조 세관장확인대상물품 허가 승인 요건 구비 확인"
 
+# 개인 해외구매(직구) 질문 → 소액·자가사용 면세 앵커. 원 문장을 붙이면
+# "직구/싸게" 표층이 가격결정 조문으로 어그로를 끌어 독립 쿼리로 둔다.
+_SHOPPING_TRIGGER = re.compile(r"직구|구매대행|배송대행|해외.{0,4}(쇼핑|주문)")
+_SHOPPING_ANCHOR = "소액물품 면세 자가사용물품 관세 면제 한도"
+
 
 def _load_cache() -> dict[str, list[str]]:
     global _cache
@@ -62,26 +67,41 @@ def _load_cache() -> dict[str, list[str]]:
     return _cache
 
 
-def _lexicon_variants(query: str) -> list[str]:
-    out: list[str] = []
+def _lexicon_variants(query: str) -> list[tuple[str, bool]]:
+    """(변형, 앵커 여부). 앵커 = 원 문장 없이 법률 용어만으로 만든 독립 쿼리."""
+    out: list[tuple[str, bool]] = []
     for pattern, expansion in _LEXICON:
         if re.search(pattern, query):
-            out.append(f"{query} {expansion}")
+            out.append((f"{query} {expansion}", False))
         if len(out) >= MAX_VARIANTS - 1:
             break
     if _REQUIREMENT_TRIGGER.search(query):
-        out.append(_REQUIREMENT_ANCHOR)
+        out.append((_REQUIREMENT_ANCHOR, True))
+    if _SHOPPING_TRIGGER.search(query):
+        out.append((_SHOPPING_ANCHOR, True))
     return out[:MAX_VARIANTS]
 
 
-def rewrite(query: str) -> list[str]:
-    """변형 쿼리 목록(원 쿼리 제외). LLM 캐시 + 규칙 레키콘 병합.
+def rewrite_tagged(query: str) -> list[tuple[str, bool]]:
+    """(변형, 앵커 여부) 목록 — retrieval 이 앵커에 원 쿼리급 가중을 주는 데 사용.
 
     골드셋 실측(2026-07-25): LLM 재작성과 레키콘이 서로 다른 문항을 살림
     (LLM=잠정가격 #4, 레키콘=수출입신고 #45) → 병합이 단독보다 커버리지 넓음.
+    앵커 가중 실측(2026-07-26): 일상어("직구")가 법률 용어와 안 겹치는 질문은
+    변형 0.6 가중으론 융합 중위권에 그침 — 앵커만 1.0 으로 승격.
     """
-    out = list(_load_cache().get(query, [])[:MAX_VARIANTS])
-    for v in _lexicon_variants(query):
-        if v not in out:
-            out.append(v)
+    out: list[tuple[str, bool]] = [
+        (v, False) for v in _load_cache().get(query, [])[:MAX_VARIANTS]
+    ]
+    seen = {v for v, _ in out}
+    # 앵커 먼저 — MAX_TOTAL 상한에 걸릴 때 덧붙임 변형이 앵커를 밀어내지 않게
+    # (실측: #8 에서 범용 덧붙임이 앵커를 밀어내 규칙45 가 top5 이탈)
+    for v, anchor in sorted(_lexicon_variants(query), key=lambda t: not t[1]):
+        if v not in seen:
+            out.append((v, anchor))
     return out[:MAX_TOTAL]
+
+
+def rewrite(query: str) -> list[str]:
+    """변형 쿼리 목록(원 쿼리 제외) — 표시/호환용."""
+    return [v for v, _ in rewrite_tagged(query)]

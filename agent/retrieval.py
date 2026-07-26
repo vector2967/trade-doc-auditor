@@ -120,18 +120,21 @@ def search(query: str, limit: int = 10, depth: int = 30,
     use_graph=True 면 융합 상위의 위임(DELEGATES) 이웃을 후보 풀에 추가한다
     (개선계획 ⑥ — 그래프는 현행 스냅샷이라 as_of 지정 시 자동 생략).
     """
-    queries = [query]
+    queries: list[tuple[str, float]] = [(query, 1.0)]
     if use_rewrite:
         from agent import query_rewrite
 
-        queries += query_rewrite.rewrite(query)
+        # 앵커(법률 용어 독립 쿼리)는 원 쿼리급 1.0 — 일상어가 법률 용어와
+        # 전혀 안 겹치는 질문("직구")에서 0.6 으론 융합 중위권에 그침(실측).
+        queries += [(v, 1.0 if anchor else VARIANT_WEIGHT)
+                    for v, anchor in query_rewrite.rewrite_tagged(query)]
     ranklists: dict[str, list[repo.Hit]] = {}
     weights: dict[str, float] = {}
-    for i, q in enumerate(queries):
+    for i, (q, w) in enumerate(queries):
         for arm in ARMS:
             key = f"{arm}:{i}"
             ranklists[key] = repo.search(q, arm=arm, limit=depth, as_of=as_of)
-            weights[key] = 1.0 if i == 0 else VARIANT_WEIGHT
+            weights[key] = w
     fused = rrf_fuse(ranklists, limit=depth, weights=weights)
     if use_graph and as_of is None and fused:
         fused = fused + graph_neighbors(fused)
