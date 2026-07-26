@@ -107,11 +107,44 @@ def _load_runtime() -> dict[str, list[str]]:
     return _runtime
 
 
+def _llm_call(query: str, timeout: float) -> str:
+    """LLM 1회 호출 → 응답 텍스트. QUERY_REWRITE_OPENAI_URL 이 있으면 OpenAI
+    호환 모드(+enable_thinking:false — 게이트웨이 reasoning 모델은 이걸 꺼야
+    1~2초, 켜져 있으면 20초+ 실측), 없으면 Anthropic SDK(공식 키)."""
+    model = os.environ.get("QUERY_REWRITE_MODEL", "claude-haiku-4-5-20251001")
+    openai_url = os.environ.get("QUERY_REWRITE_OPENAI_URL")
+    if openai_url:
+        import requests
+
+        r = requests.post(
+            openai_url,
+            headers={"Authorization": "Bearer " + os.environ["ANTHROPIC_API_KEY"]},
+            timeout=timeout,
+            json={
+                "model": model, "max_tokens": 512, "enable_thinking": False,
+                "messages": [{"role": "system", "content": LLM_SYSTEM},
+                             {"role": "user", "content": query}],
+            })
+        r.raise_for_status()
+        return r.json()["choices"][0]["message"]["content"]
+
+    import anthropic
+
+    # 재시도 0 — 재작성은 best-effort: 실패하면 레키콘 폴백이 기다리고 있고,
+    # 시연 중 응답 지연(타임아웃×재시도)이 실패 자체보다 나쁘다.
+    client = anthropic.Anthropic(timeout=timeout, max_retries=0)
+    response = client.messages.create(
+        model=model, max_tokens=512, system=LLM_SYSTEM,
+        messages=[{"role": "user", "content": query}])
+    return "".join(b.text for b in response.content if b.type == "text")
+
+
 def _llm_variants_live(query: str) -> list[str] | None:
     """캐시 미스 시 실시간 LLM 재작성. 키 없음/실패 → None (레키콘만 사용).
 
-    실패한 질문도 런타임 캐시에 [] 로 남겨 같은 세션·다음 세션에서 재호출하지
-    않는다(시연 중 같은 질문을 다시 칠 때 지연 반복 방지).
+    성공만 파일에 저장한다 — 일시 장애(타임아웃 등)를 [] 로 영구 기록하면
+    그 질문은 영영 재작성 기회를 잃는다(실측 사고). 실패는 프로세스 내에서만
+    기억해 같은 세션의 반복 지연을 막는다.
     """
     if not os.environ.get("ANTHROPIC_API_KEY"):
         return None
@@ -120,30 +153,19 @@ def _llm_variants_live(query: str) -> list[str] | None:
         return runtime[query] or None
     variants: list[str] = []
     try:
-        import anthropic
-
-        # 재시도 0 — 재작성은 best-effort: 실패하면 레키콘 폴백이 기다리고 있고,
-        # 시연 중 응답 지연(타임아웃×재시도)이 실패 자체보다 나쁘다.
-        client = anthropic.Anthropic(
-            timeout=float(os.environ.get("QUERY_REWRITE_TIMEOUT", "10")),
-            max_retries=0)
-        response = client.messages.create(
-            model=os.environ.get("QUERY_REWRITE_MODEL", "claude-haiku-4-5-20251001"),
-            max_tokens=512,
-            system=LLM_SYSTEM,
-            messages=[{"role": "user", "content": query}],
-        )
-        text = "".join(b.text for b in response.content if b.type == "text")
+        text = _llm_call(query, float(os.environ.get("QUERY_REWRITE_TIMEOUT", "10")))
         variants = parse_llm_variants(text)
     except Exception:  # noqa: BLE001 — 어떤 장애도 검색 자체를 막으면 안 됨
         pass
-    runtime[query] = variants
-    try:
-        _RUNTIME_PATH.parent.mkdir(parents=True, exist_ok=True)
-        _RUNTIME_PATH.write_text(
-            json.dumps(runtime, ensure_ascii=False, indent=1), encoding="utf-8")
-    except OSError:
-        pass
+    runtime[query] = variants  # 실패([])는 메모리에만 — 파일엔 성공만
+    if variants:
+        try:
+            _RUNTIME_PATH.parent.mkdir(parents=True, exist_ok=True)
+            persisted = {q: v for q, v in runtime.items() if v}
+            _RUNTIME_PATH.write_text(
+                json.dumps(persisted, ensure_ascii=False, indent=1), encoding="utf-8")
+        except OSError:
+            pass
     return variants or None
 
 
