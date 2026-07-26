@@ -144,25 +144,52 @@ def _node_html(law_id: str, art_no: int, title: str, body: str | None,
     return f'<div class="card">{head}</div>'
 
 
-def do_lookup(args: list[str]) -> None:
-    import webbrowser
+# Toss(TDS) 토큰: canvas #ffffff, foreground #191f28, body #4e5968, muted #8b95a1,
+# surface #f2f4f6, border #e5e8eb, primary #3182f6, weak #e8f3ff/#1b64da.
+# 그림자 토큰 없음 → 플랫 색 레이어링. 간격 4/6/8/16/24/32, 라운드 8~16.
+TOSS_CSS = """
+  body { font-family: 'Toss Product Sans', Pretendard, -apple-system, 'Malgun Gothic',
+          sans-serif; max-width: 960px; margin: 32px auto; padding: 0 24px;
+          background: #ffffff; color: #4e5968; font-size: 16px; line-height: 24px; }
+  h1 { color: #191f28; font-size: 30px; font-weight: 600; line-height: 45px;
+        margin: 0 0 4px; }
+  .meta { color: #8b95a1; font-size: 14px; line-height: 21px; margin-bottom: 24px; }
+  h2 { color: #191f28; font-size: 22px; font-weight: 600; line-height: 33px;
+        margin: 32px 0 8px; }
+  .count { color: #8b95a1; font-weight: 400; font-size: 14px; margin-left: 6px; }
+  .badge { display: inline-block; border-radius: 6px; padding: 2px 8px;
+            font-size: 13px; font-weight: 600; line-height: 20px; margin-right: 8px; }
+  .title { color: #8b95a1; margin-left: 8px; font-weight: 400; }
+  b { color: #191f28; font-weight: 600; }
+  .card { border: 1px solid #e5e8eb; border-radius: 16px; background: #ffffff;
+           padding: 12px 20px; margin: 8px 0; }
+  section.root > .card { background: #f2f4f6; border-color: #f2f4f6; }
+  pre { white-space: pre-wrap; font-family: inherit; font-size: 16px; line-height: 24px;
+         color: #4e5968; margin: 12px 0 4px; padding-top: 12px;
+         border-top: 1px solid #e5e8eb; }
+  summary { cursor: pointer; }  summary::marker { color: #3182f6; }
+  summary:hover b { color: #3182f6; }
+  ul { list-style: none; padding-left: 28px; position: relative; margin: 0; }
+  ul li { position: relative; }
+  ul li::before { content: ""; position: absolute; left: -16px; top: 26px;
+                   width: 12px; border-top: 2px solid #e5e8eb; }
+  ul li::after { content: ""; position: absolute; left: -16px; top: 0; bottom: 0;
+                  border-left: 2px solid #e5e8eb; }
+  ul li:last-child::after { height: 26px; bottom: auto; }
+  .chip { display: inline-block; background: #f2f4f6; color: #4e5968;
+           border-radius: 999px; padding: 4px 16px; margin: 4px 6px 4px 0;
+           font-size: 14px; line-height: 21px; }
+  a { color: inherit; text-decoration: none; }
+"""
 
+
+def build_lookup_html(law_id: str, art_no: int) -> tuple[str, dict] | None:
+    """조문 페이지 HTML — CLI(:조회)와 웹데모(/article)가 공유. 없으면 None."""
     from src import repository as repo
 
-    alias, _ = _law_maps()
-    if len(args) < 2 or (args[0] not in alias and not args[0].isdigit()):
-        print("사용법: :조회 <법|영|규칙|법령명> <조번호[의N]>   예) :조회 법 226")
-        return
-    law_id = alias.get(args[0], args[0])
-    try:
-        art_no = _parse_article_no(args[1])
-    except ValueError:
-        print(f"조번호 해석 불가: {args[1]}")
-        return
     row = repo.resolve_as_of(law_id, art_no, None)
     if row is None:
-        print("  현행 기준으로 해당 조문 없음")
-        return
+        return None
 
     info = _law_info()
     law_name = info.get(law_id, (law_id, ""))[0]
@@ -206,42 +233,7 @@ def do_lookup(args: list[str]) -> None:
     import html as H
     page = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <title>{H.escape(law_name)} {_fmt_article_no(art_no)}</title>
-<style>
-  /* Toss(TDS) 토큰: canvas #ffffff, foreground #191f28, body #4e5968, muted #8b95a1,
-     surface #f2f4f6, border #e5e8eb, primary #3182f6, weak #e8f3ff/#1b64da.
-     그림자 토큰 없음 → 플랫 색 레이어링. 간격 4/6/8/16/24/32, 라운드 8~16. */
-  body {{ font-family: 'Toss Product Sans', Pretendard, -apple-system, 'Malgun Gothic',
-          sans-serif; max-width: 960px; margin: 32px auto; padding: 0 24px;
-          background: #ffffff; color: #4e5968; font-size: 16px; line-height: 24px; }}
-  h1 {{ color: #191f28; font-size: 30px; font-weight: 600; line-height: 45px;
-        margin: 0 0 4px; }}
-  .meta {{ color: #8b95a1; font-size: 14px; line-height: 21px; margin-bottom: 24px; }}
-  h2 {{ color: #191f28; font-size: 22px; font-weight: 600; line-height: 33px;
-        margin: 32px 0 8px; }}
-  .count {{ color: #8b95a1; font-weight: 400; font-size: 14px; margin-left: 6px; }}
-  .badge {{ display: inline-block; border-radius: 6px; padding: 2px 8px;
-            font-size: 13px; font-weight: 600; line-height: 20px; margin-right: 8px; }}
-  .title {{ color: #8b95a1; margin-left: 8px; font-weight: 400; }}
-  b {{ color: #191f28; font-weight: 600; }}
-  .card {{ border: 1px solid #e5e8eb; border-radius: 16px; background: #ffffff;
-           padding: 12px 20px; margin: 8px 0; }}
-  section.root > .card {{ background: #f2f4f6; border-color: #f2f4f6; }}
-  pre {{ white-space: pre-wrap; font-family: inherit; font-size: 16px; line-height: 24px;
-         color: #4e5968; margin: 12px 0 4px; padding-top: 12px;
-         border-top: 1px solid #e5e8eb; }}
-  summary {{ cursor: pointer; }}  summary::marker {{ color: #3182f6; }}
-  summary:hover b {{ color: #3182f6; }}
-  ul {{ list-style: none; padding-left: 28px; position: relative; margin: 0; }}
-  ul li {{ position: relative; }}
-  ul li::before {{ content: ""; position: absolute; left: -16px; top: 26px;
-                   width: 12px; border-top: 2px solid #e5e8eb; }}
-  ul li::after {{ content: ""; position: absolute; left: -16px; top: 0; bottom: 0;
-                  border-left: 2px solid #e5e8eb; }}
-  ul li:last-child::after {{ height: 26px; bottom: auto; }}
-  .chip {{ display: inline-block; background: #f2f4f6; color: #4e5968;
-           border-radius: 999px; padding: 4px 16px; margin: 4px 6px 4px 0;
-           font-size: 14px; line-height: 21px; }}
-</style></head><body>
+<style>{TOSS_CSS}</style></head><body>
 <h1>{H.escape(law_name)} {_fmt_article_no(art_no)}</h1>
 <div class="meta">{H.escape(row["title"] or "")} · 시행 {row["valid_from"]} ~ {until}{"" if row["is_current"] else " · 이력 버전"}</div>
 <section class="root">{_node_html(law_id, art_no, row["title"], _clean_body(row["content"], art_no), info, open_body=True)}</section>
@@ -250,14 +242,36 @@ def do_lookup(args: list[str]) -> None:
 <h2>인용<span class="count">{len(cites)}건</span></h2>
 {cites_html or '<p class="meta">인용 관계 없음</p>'}
 </body></html>"""
+    return page, {"law_name": law_name, "title": row["title"],
+                  "hop1": len(hop1), "cites": len(cites)}
+
+
+def do_lookup(args: list[str]) -> None:
+    import webbrowser
+
+    alias, _ = _law_maps()
+    if len(args) < 2 or (args[0] not in alias and not args[0].isdigit()):
+        print("사용법: :조회 <법|영|규칙|법령명> <조번호[의N]>   예) :조회 법 226")
+        return
+    law_id = alias.get(args[0], args[0])
+    try:
+        art_no = _parse_article_no(args[1])
+    except ValueError:
+        print(f"조번호 해석 불가: {args[1]}")
+        return
+    built = build_lookup_html(law_id, art_no)
+    if built is None:
+        print("  현행 기준으로 해당 조문 없음")
+        return
+    page, meta = built
 
     out_dir = ROOT / "demo_out"
     out_dir.mkdir(exist_ok=True)
-    out = out_dir / f"조회_{law_name}_{args[1]}.html".replace(" ", "_")
+    out = out_dir / f"조회_{meta['law_name']}_{args[1]}.html".replace(" ", "_")
     out.write_text(page, encoding="utf-8")
     webbrowser.open(out.as_uri())
-    print(f"  {law_name} {_fmt_article_no(art_no)} ({row['title']}) — "
-          f"위임 {len(hop1)}건, 인용 {len(cites)}건")
+    print(f"  {meta['law_name']} {_fmt_article_no(art_no)} ({meta['title']}) — "
+          f"위임 {meta['hop1']}건, 인용 {meta['cites']}건")
     print(f"  브라우저로 열었습니다: {out}")
 
 
