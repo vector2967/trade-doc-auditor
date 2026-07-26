@@ -89,8 +89,9 @@ def laws():
         for lid, name, hier, cnt in rows)
     return _page("법령 조회", f"""
 <h1>법령 조회</h1>
-<div class="meta">적재 법령 {len(rows)}종 · 현행 조문 기준 · 목록에서 법령을 선택하세요</div>
-<input class="filter" placeholder="법령명 필터 (예: 관세, 식품, 화학)" oninput="flt(this)" autofocus>
+<div class="meta">현행 조문 기준 · 목록에서 법령을 선택하세요 ·
+ <a href="/" style="color:#3182f6">질문으로 검색하기 →</a></div>
+<input class="filter" placeholder="법령명으로 찾기 (예: 관세, 식품, 화학)" oninput="flt(this)" autofocus>
 {items}""")
 
 

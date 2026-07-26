@@ -107,17 +107,17 @@ def _search_form(q: str = "", fast: bool = False) -> str:
   <button type="submit">검색</button>
 </form>
 <label class="fast"><input type="checkbox" name="fast" value="1" form="sf"
-  {"checked" if fast else ""}> 빠른 모드 (rerank 생략 — GPU 없을 때)</label>
-<div class="spin">검색 중… (재작성 → dense+bm25 → RRF 융합 → rerank 혼합)</div>
+  {"checked" if fast else ""}> 빠른 검색 (정밀 정렬 생략)</label>
+<div class="spin">검색 중…</div>
 <div>{chips}</div>"""
 
 
 @app.get("/", response_class=HTMLResponse)
 def home():
-    return _page("통관 법령 검색 데모", f"""
+    return _page("통관 법령 검색", f"""
 <h1 class="home-title">통관 법령 검색</h1>
-<div class="meta">법령 65종 · 조문 5,897청크 · 재작성 + dense/bm25 융합 + rerank 혼합 (recall@5 0.730)
- · <a href="/laws" style="color:#3182f6">법령 목록에서 조문 찾아보기 →</a></div>
+<div class="meta">통관·관세 질문을 평소 쓰는 말로 물어보세요.
+ <a href="/laws" style="color:#3182f6">법령 목록에서 직접 찾아보기 →</a></div>
 {_search_form(fast=_default_fast())}""")
 
 
@@ -181,9 +181,9 @@ def search(q: str = "", fast: bool = False):
     return _page(f"{q} — 검색", f"""
 <h1><a href="/">통관 법령 검색</a></h1>
 {_search_form(q, fast)}
-<h2>결과<span class="count">{rank}건 · {dt:.1f}초 · {"빠른 모드(융합만)" if fast else "풀 파이프라인"}</span></h2>
-{cards or '<p class="meta">결과 없음</p>'}
-{f'<h2>재작성 변형<span class="count">검색에 함께 사용됨</span></h2>{variants_html}' if variants else ''}""")
+<h2>결과<span class="count">{rank}건 · {dt:.1f}초</span></h2>
+{cards or '<p class="meta">결과가 없어요 — 표현을 바꿔 다시 물어보세요</p>'}
+{f'<h2>함께 검색한 표현<span class="count">질문을 법령 용어로 바꿔 함께 찾았어요</span></h2>{variants_html}' if variants else ''}""")
 
 
 @app.get("/article/{law_id}/{art_token}", response_class=HTMLResponse)
