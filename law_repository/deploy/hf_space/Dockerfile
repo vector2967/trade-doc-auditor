@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-RUN git clone --depth 1 https://github.com/vector2967/trade-doc-auditor.git repo
+RUN git clone --depth 1 -b upset_vector_db https://github.com/vector2967/trade-doc-auditor.git repo
 WORKDIR /app/repo/law_repository
 
 # torch 는 CPU 휠로 (기본 인덱스는 CUDA 포함이라 이미지가 수 GB 커짐)
@@ -15,12 +15,15 @@ RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/wh
  && pip install --no-cache-dir -r requirements.txt
 
 # bge-m3 를 이미지에 미리 다운로드 — 콜드스타트에서 모델 받는 시간 제거
+# (reranker 는 미리 받지 않음 — CPU Space 는 빠른 모드가 기본이라 안 쓰임)
 ENV HF_HOME=/app/hf_cache
 RUN python -c "from FlagEmbedding import BGEM3FlagModel; BGEM3FlagModel('BAAI/bge-m3', use_fp16=False)" \
  && chmod -R a+rwX /app/hf_cache
 
-# DB 접속정보(POSTGRES_*, QDRANT_*, NEO4J_*)와 DEMO_TOKEN 은
-# Space Settings > Variables and secrets 에 등록한다 (.env 파일 불필요 — env 가 우선).
+# DB 접속정보(POSTGRES_*, QDRANT_*, NEO4J_*)와 DEMO_TOKEN,
+# (선택) 실시간 재작성용 ANTHROPIC_API_KEY / QUERY_REWRITE_OPENAI_URL /
+# QUERY_REWRITE_MODEL 은 Space Settings > Variables and secrets 에 등록한다.
 ENV PORT=7860
 EXPOSE 7860
-CMD ["python", "-m", "src.webapp"]
+WORKDIR /app/repo
+CMD ["python", "demo_web.py"]

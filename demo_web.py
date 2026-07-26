@@ -3,6 +3,11 @@
 실행: 리포 루트에서  python demo_web.py   (모델 로딩 후 브라우저 자동 오픈)
 전제: 도커 3-스토어 기동. GPU 있으면 풀 검색 ~6초, 없으면 빠른 모드 권장.
 
+HF Space 등 원격 배포:
+  - PORT 환경변수가 있으면 0.0.0.0:$PORT 로 리슨하고 브라우저 오픈 생략.
+  - GPU 가 없으면 '빠른 모드'가 기본 체크됨 (CPU rerank 는 질의당 수 분).
+  - DEMO_TOKEN 설정 시 ?token=<값> 으로 접속해야 함 (이후 쿠키로 유지).
+
 라우트:
   /                    검색 홈 (예시 질문 포함)
   /search?q=…&fast=1   검색 결과 (fast=1 이면 rerank 생략)
@@ -11,6 +16,7 @@
 from __future__ import annotations
 
 import html as H
+import os
 import sys
 import time
 from pathlib import Path
@@ -19,12 +25,39 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "law_repository"))
 
-from fastapi import FastAPI  # noqa: E402
-from fastapi.responses import HTMLResponse, RedirectResponse  # noqa: E402
+from fastapi import FastAPI, Request  # noqa: E402
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse  # noqa: E402
 
 import demo  # noqa: E402  (Toss CSS·조문 페이지 빌더 공유)
 
 app = FastAPI()
+
+_DEMO_TOKEN = os.environ.get("DEMO_TOKEN", "")
+
+
+def _default_fast() -> bool:
+    """GPU 없으면 빠른 모드 기본 — CPU rerank 는 질의당 수 분(배포 Space 실측 불가 수준)."""
+    try:
+        import torch
+
+        return not torch.cuda.is_available()
+    except Exception:  # noqa: BLE001
+        return True
+
+
+@app.middleware("http")
+async def _token_guard(request: Request, call_next):
+    """DEMO_TOKEN 설정 시 접근 보호 — ?token= 1회 통과 후 쿠키로 유지."""
+    if _DEMO_TOKEN:
+        supplied = (request.query_params.get("token")
+                    or request.cookies.get("demo_token"))
+        if supplied != _DEMO_TOKEN:
+            return JSONResponse(
+                {"detail": "token 필요 — ?token=<값> 링크로 접속하세요"}, status_code=401)
+        response = await call_next(request)
+        response.set_cookie("demo_token", _DEMO_TOKEN, httponly=True)
+        return response
+    return await call_next(request)
 
 EXAMPLES = [
     "해외에서 수리하고 다시 들여오는 기계 세금 어떻게 되나요",
@@ -83,8 +116,16 @@ def _search_form(q: str = "", fast: bool = False) -> str:
 def home():
     return _page("통관 법령 검색 데모", f"""
 <h1 class="home-title">통관 법령 검색</h1>
-<div class="meta">법령 65종 · 조문 5,897청크 · 재작성 + dense/bm25 융합 + rerank 혼합 (recall@5 0.730)</div>
-{_search_form()}""")
+<div class="meta">법령 65종 · 조문 5,897청크 · 재작성 + dense/bm25 융합 + rerank 혼합 (recall@5 0.730)
+ · <a href="/laws" style="color:#3182f6">법령 목록에서 조문 찾아보기 →</a></div>
+{_search_form(fast=_default_fast())}""")
+
+
+# 법령 조회(목록→조문)는 demo_laws 소유 — 같은 앱에 라우트로 합류
+import demo_laws  # noqa: E402
+
+app.get("/laws", response_class=HTMLResponse)(demo_laws.laws)
+app.get("/law/{law_id}", response_class=HTMLResponse)(demo_laws.law)
 
 
 @app.get("/search", response_class=HTMLResponse)
@@ -170,6 +211,19 @@ def main() -> int:
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(errors="replace")
+
+    port = os.environ.get("PORT")
+    if port:  # 원격 배포(HF Space 등): 외부 리슨, 브라우저 오픈 없음
+        if _default_fast():
+            # CPU 배포: reranker 는 선로딩하지 않음 (빠른 모드 기본이라 안 쓰임)
+            from src.embed import dense
+
+            dense.encode(["워밍업"])
+        else:
+            demo._preload()
+        uvicorn.run(app, host="0.0.0.0", port=int(port), log_level="warning")
+        return 0
+
     demo._preload()
     threading.Timer(1.0, lambda: webbrowser.open("http://127.0.0.1:8899/")).start()
     print("웹 데모: http://127.0.0.1:8899/  (종료: Ctrl+C)")

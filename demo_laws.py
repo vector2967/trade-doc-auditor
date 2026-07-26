@@ -59,6 +59,14 @@ def _badge(hier: str) -> str:
 
 
 @app.get("/", response_class=HTMLResponse)
+def _root():
+    from fastapi.responses import RedirectResponse
+
+    return RedirectResponse("/laws")
+
+
+# 목록은 /laws 고정 경로 — demo_web 에 합쳐질 때도 링크가 그대로 동작한다
+@app.get("/laws", response_class=HTMLResponse)
 def laws():
     from src.db.postgres import connect
 
@@ -92,7 +100,7 @@ def law(law_id: str):
 
     info = demo._law_info()
     if law_id not in info:
-        return _page("없음", '<h1>등록되지 않은 법령</h1><p><a href="/" style="color:#3182f6">← 목록으로</a></p>')
+        return _page("없음", '<h1>등록되지 않은 법령</h1><p><a href="/laws" style="color:#3182f6">← 목록으로</a></p>')
     law_name, hier = info[law_id]
     with connect() as conn, conn.cursor() as cur:
         cur.execute(
@@ -108,7 +116,7 @@ def law(law_id: str):
                   f'<span class="num">{demo._fmt_article_no(art_no)}</span>'
                   f'<b class="grow">{H.escape(title or "(제목 없음)")}</b></div></a>')
     return _page(law_name, f"""
-<div class="meta" style="margin-bottom:8px"><a href="/" style="color:#3182f6">← 법령 목록</a></div>
+<div class="meta" style="margin-bottom:8px"><a href="/laws" style="color:#3182f6">← 법령 목록</a></div>
 <h1>{H.escape(law_name)}</h1>
 <div class="meta">{_badge(hier)} 현행 조문 {len(rows)}건</div>
 <input class="filter" placeholder="조번호·제목 필터 (예: 226, 환급, 면세)" oninput="flt(this)" autofocus>
