@@ -93,11 +93,59 @@ def _fmt_article_no(article_no: int) -> str:
     return f"제{article_no // 100}조" + (f"의{article_no % 100}" if article_no % 100 else "")
 
 
+_HIER_RANK = {"법률": 0, "시행령": 1, "시행규칙": 2}
+_HIER_COLOR = {"법률": "#2563eb", "시행령": "#059669", "시행규칙": "#d97706"}
+
+
+def _law_info() -> dict[str, tuple[str, str]]:
+    """law_id → (법령명, 위계). laws 테이블에서 1회 로드."""
+    from src.db.postgres import connect
+
+    with connect() as conn, conn.cursor() as cur:
+        cur.execute("SELECT law_id, law_name, hierarchy FROM laws")
+        return {r[0]: (r[1], r[2]) for r in cur.fetchall()}
+
+
+def _title_of(content: str) -> str:
+    """조문 본문 헤더('[법령명 제N조(제목)]')에서 제목만 추출."""
+    import re
+
+    m = re.search(r"제\d+조(?:의\d+)?\(([^)]*)\)", content.splitlines()[0])
+    return m.group(1) if m else ""
+
+
+def _clean_body(content: str, art_no: int) -> str:
+    lines = content.splitlines()
+    # 청크 헤더('[법령명 제N조(…)]')와 조문 제목 줄은 표제와 중복 — 건너뜀
+    while lines and (lines[0].strip().startswith("[")
+                     or lines[0].strip().startswith(f"제{art_no // 100}조")):
+        lines = lines[1:]
+    return "\n".join(lines).strip()
+
+
+def _node_html(law_id: str, art_no: int, title: str, body: str | None,
+               info: dict, open_body: bool = False) -> str:
+    import html as H
+
+    law_name, hier = info.get(law_id, (law_id, "법률"))
+    color = _HIER_COLOR.get(hier, "#6b7280")
+    head = (f'<span class="badge" style="background:{color}">{H.escape(hier)}</span> '
+            f'<b>{H.escape(law_name)} {_fmt_article_no(art_no)}</b>'
+            f'<span class="title">({H.escape(title or "")})</span>')
+    if body:
+        return (f'<div class="card" style="border-left-color:{color}">'
+                f'<details{" open" if open_body else ""}><summary>{head}</summary>'
+                f'<pre>{H.escape(body)}</pre></details></div>')
+    return f'<div class="card" style="border-left-color:{color}">{head}</div>'
+
+
 def do_lookup(args: list[str]) -> None:
+    import webbrowser
+
     from src import repository as repo
 
-    alias, name = _law_maps()
-    if len(args) < 2 or (args[0] not in alias and args[0] not in name):
+    alias, _ = _law_maps()
+    if len(args) < 2 or (args[0] not in alias and not args[0].isdigit()):
         print("사용법: :조회 <법|영|규칙|법령명> <조번호[의N]>   예) :조회 법 226")
         return
     law_id = alias.get(args[0], args[0])
@@ -110,27 +158,91 @@ def do_lookup(args: list[str]) -> None:
     if row is None:
         print("  현행 기준으로 해당 조문 없음")
         return
-    until = row["valid_to"] or "현행"
-    print(f"\n  {name.get(law_id, law_id)} {_fmt_article_no(art_no)} ({row['title']})")
-    print(f"  [시행 {row['valid_from']} ~ {until}]")
-    body = row["content"].splitlines()
-    # 청크 헤더('[법령명 제N조(…)]')와 조문 제목 줄은 위 헤더와 중복 — 건너뜀
-    while body and (body[0].strip().startswith("[") or body[0].strip().startswith(f"제{art_no // 100}조")):
-        body = body[1:]
-    for line in body[:15]:
-        print(f"  {line}")
-    if len(body) > 15:
-        print(f"  … (총 {len(body)}줄, 이하 생략)")
 
-    edges = repo.expand_article(row["article_pk"])
-    print(f"\n  [그래프 연결 {len(edges)}건]")
-    for e in edges[:10]:
-        law = name.get(e["law_id"], e["law_id"])
-        label = f"{law} {_fmt_article_no(e['article_no'])}" if e["article_no"] else (e["title"] or "")
-        rel = {"DELEGATES": "위임→", "CITES": "인용→", "DETAILED_IN": "상세→"}.get(e["rel"], e["rel"])
-        print(f"    {rel} {label} ({e['title'] or ''})")
-    if len(edges) > 10:
-        print(f"    … 외 {len(edges) - 10}건")
+    info = _law_info()
+    law_name = info.get(law_id, (law_id, ""))[0]
+    until = row["valid_to"] or "현행"
+
+    # 위임 체인: 1홉(내용 포함) → 2홉은 각 1홉 노드보다 하위 위계만 (법→영→규칙 방향)
+    hop1 = repo.delegation_neighbors([row["article_pk"]])
+    seen = {row["article_pk"]} | {n["article_pk"] for n in hop1}
+    hop2_by_src: dict[int, list[dict]] = {}
+    if hop1:
+        rank_of = {n["article_pk"]: _HIER_RANK.get(info.get(n["law_id"], ("", ""))[1], 0)
+                   for n in hop1}
+        for n2 in repo.delegation_neighbors([n["article_pk"] for n in hop1]):
+            src = n2["src_article_pk"]
+            if (n2["article_pk"] not in seen
+                    and _HIER_RANK.get(info.get(n2["law_id"], ("", ""))[1], 0) > rank_of.get(src, 0)
+                    and len(hop2_by_src.get(src, [])) < 4):
+                hop2_by_src.setdefault(src, []).append(n2)
+                seen.add(n2["article_pk"])
+    cites = [e for e in repo.expand_article(row["article_pk"])
+             if e["rel"] == "CITES" and e["article_no"]]
+
+    chain_html = ""
+    for n in hop1:
+        chain_html += "<li>" + _node_html(
+            n["law_id"], n["article_no"], _title_of(n["content"]),
+            _clean_body(n["content"], n["article_no"]), info)
+        kids = hop2_by_src.get(n["article_pk"], [])
+        if kids:
+            chain_html += "<ul>" + "".join(
+                "<li>" + _node_html(
+                    k["law_id"], k["article_no"], _title_of(k["content"]),
+                    _clean_body(k["content"], k["article_no"]), info) + "</li>"
+                for k in kids) + "</ul>"
+        chain_html += "</li>"
+    cites_html = "".join(
+        f'<span class="chip">{info.get(e["law_id"], (e["law_id"],))[0]} '
+        f'{_fmt_article_no(e["article_no"])} ({e["title"] or ""})</span>'
+        for e in cites)
+
+    import html as H
+    page = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<title>{H.escape(law_name)} {_fmt_article_no(art_no)}</title>
+<style>
+  body {{ font-family: 'Malgun Gothic', sans-serif; max-width: 960px; margin: 2rem auto;
+         padding: 0 1rem; color: #1f2937; line-height: 1.7; }}
+  h1 {{ font-size: 1.4rem; margin-bottom: .2rem; }}
+  .meta {{ color: #6b7280; margin-bottom: 1rem; }}
+  .badge {{ color: #fff; border-radius: 4px; padding: 1px 8px; font-size: .78rem; margin-right: 6px; }}
+  .title {{ color: #6b7280; margin-left: 6px; }}
+  .card {{ border: 1px solid #e5e7eb; border-left: 4px solid #999; border-radius: 8px;
+           padding: .55rem .9rem; margin: .45rem 0; background: #fff; }}
+  pre {{ white-space: pre-wrap; font-family: inherit; font-size: .92rem; color: #374151;
+         margin: .6rem 0 0; padding-top: .6rem; border-top: 1px dashed #e5e7eb; }}
+  summary {{ cursor: pointer; }}  summary::marker {{ color: #9ca3af; }}
+  ul {{ list-style: none; padding-left: 1.6rem; position: relative; }}
+  ul li {{ position: relative; }}
+  ul li::before {{ content: ""; position: absolute; left: -1rem; top: 1.4rem;
+                   width: .8rem; border-top: 2px solid #cbd5e1; }}
+  ul li::after {{ content: ""; position: absolute; left: -1rem; top: 0; bottom: 0;
+                  border-left: 2px solid #cbd5e1; }}
+  ul li:last-child::after {{ height: 1.4rem; bottom: auto; }}
+  h2 {{ font-size: 1.05rem; margin-top: 1.6rem; border-bottom: 2px solid #e5e7eb;
+        padding-bottom: .3rem; }}
+  .chip {{ display: inline-block; background: #f3f4f6; border: 1px solid #e5e7eb;
+           border-radius: 999px; padding: 2px 12px; margin: 3px; font-size: .85rem; }}
+  section.root > .card {{ box-shadow: 0 1px 4px rgba(0,0,0,.08); }}
+</style></head><body>
+<h1>{H.escape(law_name)} {_fmt_article_no(art_no)} ({H.escape(row["title"] or "")})</h1>
+<div class="meta">시행 {row["valid_from"]} ~ {until} · 현행 여부: {"현행" if row["is_current"] else "이력"}</div>
+<section class="root">{_node_html(law_id, art_no, row["title"], _clean_body(row["content"], art_no), info, open_body=True)}</section>
+<h2>위임 체인 (DELEGATES) — {len(hop1)}건{" · 카드를 클릭하면 조문 본문" if hop1 else ""}</h2>
+{f'<ul style="padding-left:.2rem">{chain_html}</ul>' if hop1 else '<p class="meta">위임 관계 없음</p>'}
+<h2>인용 (CITES) — {len(cites)}건</h2>
+{cites_html or '<p class="meta">인용 관계 없음</p>'}
+</body></html>"""
+
+    out_dir = ROOT / "demo_out"
+    out_dir.mkdir(exist_ok=True)
+    out = out_dir / f"조회_{law_name}_{args[1]}.html".replace(" ", "_")
+    out.write_text(page, encoding="utf-8")
+    webbrowser.open(out.as_uri())
+    print(f"  {law_name} {_fmt_article_no(art_no)} ({row['title']}) — "
+          f"위임 {len(hop1)}건, 인용 {len(cites)}건")
+    print(f"  브라우저로 열었습니다: {out}")
 
 
 def do_search(question: str, st: State) -> None:

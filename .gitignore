@@ -40,3 +40,6 @@ law_repository/deploy/.env.cloud
 
 # recall 평가 리포트 커밋 (*.md 무시의 예외)
 !law_repository/data/eval/*.md
+
+# 시연 CLI(:조회) HTML 출력물 — 로컬 전용
+demo_out/
