@@ -53,10 +53,16 @@ _RERANK_MODEL = "BAAI/bge-reranker-v2-m3"
 def _get_reranker():
     global _reranker
     if _reranker is None:
+        import torch
         from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
         tok = AutoTokenizer.from_pretrained(_RERANK_MODEL)
-        model = AutoModelForSequenceClassification.from_pretrained(_RERANK_MODEL)
+        cuda = torch.cuda.is_available()
+        model = AutoModelForSequenceClassification.from_pretrained(
+            _RERANK_MODEL, dtype=torch.float16 if cuda else torch.float32
+        )
+        if cuda:
+            model = model.to("cuda")
         model.eval()
         _reranker = (tok, model)
     return _reranker
@@ -70,14 +76,16 @@ def rerank(query: str, hits: list[repo.Hit], limit: int,
     import torch
 
     tok, model = _get_reranker()
+    if model.device.type == "cuda":
+        batch_size = max(batch_size, 16)  # 8GB VRAM 에서 2048토큰×16쌍 여유
     scores: list[float] = []
     with torch.no_grad():
         for i in range(0, len(hits), batch_size):
             batch = hits[i : i + batch_size]
             enc = tok([query] * len(batch), [h.text for h in batch],
                       padding=True, truncation=True, max_length=max_length,
-                      return_tensors="pt")
-            scores.extend(model(**enc).logits.squeeze(-1).tolist())
+                      return_tensors="pt").to(model.device)
+            scores.extend(model(**enc).logits.squeeze(-1).float().tolist())
     order = sorted(zip(hits, scores), key=lambda t: -t[1])
     return [repo.Hit(h.article_pk, float(s), h.text) for h, s in order[:limit]]
 
