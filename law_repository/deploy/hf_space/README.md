@@ -1,5 +1,5 @@
 ---
-title: 관세법령 저장소 데모
+title: 통관 법령 검색 데모
 emoji: ⚖️
 colorFrom: blue
 colorTo: indigo
