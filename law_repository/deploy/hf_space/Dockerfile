@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
 WORKDIR /app
 # CODE_REV: 코드 리비전 표시 겸 도커 캐시 무효화 — GitHub 에 새 코드를 push 하면
 # 이 값을 그 커밋 SHA 로 바꿔서 Space 에 올려야 clone 레이어가 다시 돈다.
-ARG CODE_REV=f5a9542
+ARG CODE_REV=a740499
 RUN git clone --branch upset_vector_db --depth 1 https://github.com/vector2967/trade-doc-auditor.git repo
 WORKDIR /app/repo/law_repository
 
