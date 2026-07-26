@@ -162,3 +162,59 @@ def test_expand_article_graceful(sample_hsk):
     """조문 그래프 미구축이어도 예외 없이 list 반환(그래프 생기면 자동 동작)."""
     out = repo.expand_article(1)
     assert isinstance(out, list)
+
+
+# ------------------------------------------- 위임 이웃 배치 조회(개선계획 ⑥)
+
+@pytest.fixture(scope="module")
+def article_226_pk():
+    from src.db.postgres import connect
+
+    try:
+        with connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                "SELECT id FROM law_articles WHERE law_id='001556'"
+                " AND article_no=22600 AND is_current AND parent_article_pk IS NULL"
+            )
+            row = cur.fetchone()
+    except Exception as e:  # noqa: BLE001
+        pytest.skip(f"Postgres 접속 불가: {e}")
+    if row is None:
+        pytest.skip("관세법 226조 미적재")
+    return row[0]
+
+
+def test_delegation_neighbors_bidirectional(article_226_pk):
+    """법 226(세관장확인) → 시행령 위임 조문이 이웃으로 나와야 한다."""
+    out = repo.delegation_neighbors([article_226_pk])
+    if not out:
+        pytest.skip("조문 그래프(DELEGATES) 미구축")
+    assert all(n["article_pk"] != article_226_pk for n in out), "시드 자신이 포함됨"
+    assert any(n["law_id"] == "002421" for n in out), "시행령 이웃 없음"
+    assert all(n["content"] for n in out)
+    assert all(n["src_article_pk"] == article_226_pk for n in out)
+
+
+def test_delegation_neighbors_promotes_chunk_pk(article_226_pk):
+    """항 청크 pk 를 넣어도 조 단위로 승격해 같은 이웃을 반환해야 한다."""
+    from src.db.postgres import connect
+
+    with connect() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT id FROM law_articles WHERE parent_article_pk IS NOT NULL"
+            " AND is_current LIMIT 1"
+        )
+        row = cur.fetchone()
+    if row is None:
+        pytest.skip("분할 청크 없음")
+    chunk_pk = row[0]
+    with connect() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT parent_article_pk FROM law_articles WHERE id = %s", (chunk_pk,)
+        )
+        parent_pk = cur.fetchone()[0]
+    assert repo.delegation_neighbors([chunk_pk]) == repo.delegation_neighbors([parent_pk])
+
+
+def test_delegation_neighbors_empty_input():
+    assert repo.delegation_neighbors([]) == []

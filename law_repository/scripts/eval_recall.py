@@ -28,8 +28,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # agent 레이어(
 from src import repository as repo  # noqa: E402
 from src.db.postgres import connect  # noqa: E402
 
-# 융합/rerank/재작성은 에이전트 레이어 소유 — arm 이름으로 디스패치
-AGENT_ARMS = ("rrf", "rrf_rerank", "rw_rrf_rerank")
+# 융합/rerank/재작성/그래프확장은 에이전트 레이어 소유 — arm 이름으로 디스패치
+AGENT_ARMS = ("rrf", "rrf_rerank", "rw_rrf_rerank", "rrf_gx_rerank", "rw_rrf_gx_rerank")
 
 
 def run_search(question: str, arm: str, depth: int):
@@ -40,6 +40,7 @@ def run_search(question: str, arm: str, depth: int):
             question, limit=depth,
             use_rerank=arm.endswith("rerank"),
             use_rewrite=arm.startswith("rw_"),
+            use_graph="gx" in arm.split("_"),
         )
     return repo.search(question, arm=arm, limit=depth)
 

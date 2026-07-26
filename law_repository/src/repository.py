@@ -238,6 +238,71 @@ RETURN type(rel) AS rel, properties(rel) AS props,
 """
 
 
+def delegation_neighbors(article_pks: list[int]) -> list[dict]:
+    """검색 후보의 위임(DELEGATES) 이웃 배치 조회 — 검색 확장(개선계획 ⑥)용.
+
+    양방향: 법→영(위임 상세)과 영→법(상위 근거) 모두 회수 대상이다.
+    입력은 Qdrant payload 의 article_pk(항 청크 pk 포함) — 조 단위 pk 로
+    승격해 그래프를 조회하고, 시드 자신(같은 조문)은 결과에서 뺀다.
+    반환 순서: 시드 순위 우선, 같은 시드 안에서는 엣지 참조 횟수(count) 내림차순.
+    그래프는 현행 스냅샷이므로 as_of 검색에는 쓰지 말 것.
+    """
+    if not article_pks:
+        return []
+    with connect() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT id, coalesce(parent_article_pk, id) FROM law_articles"
+            " WHERE id = ANY(%s)",
+            (article_pks,),
+        )
+        promote = dict(cur.fetchall())
+    seed_jo: list[int] = []
+    for pk in article_pks:  # 입력 순서 유지 + 중복 제거
+        jo = promote.get(pk, pk)
+        if jo not in seed_jo:
+            seed_jo.append(jo)
+
+    drv = make_driver()
+    try:
+        with drv.session() as s:
+            edges = s.run(
+                """
+                UNWIND $pks AS pk
+                MATCH (a:Article {article_pk: pk})-[r:DELEGATES]-(t:Article)
+                RETURN pk AS src, t.article_pk AS dst, r.count AS weight
+                """,
+                pks=seed_jo,
+            ).data()
+    finally:
+        drv.close()
+
+    seed_set = set(seed_jo)
+    rank = {pk: i for i, pk in enumerate(seed_jo)}
+    edges = [e for e in edges if e["dst"] not in seed_set]
+    edges.sort(key=lambda e: (rank[e["src"]], -(e["weight"] or 1)))
+    dst_order: list[int] = []
+    src_of: dict[int, int] = {}
+    for e in edges:
+        if e["dst"] not in src_of:
+            src_of[e["dst"]] = e["src"]
+            dst_order.append(e["dst"])
+    if not dst_order:
+        return []
+
+    with connect() as conn, conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            "SELECT id AS article_pk, law_id, article_no, content"
+            " FROM law_articles WHERE id = ANY(%s) AND is_current",
+            (dst_order,),
+        )
+        by_pk = {r["article_pk"]: r for r in cur.fetchall()}
+    return [
+        {**by_pk[pk], "src_article_pk": src_of[pk]}
+        for pk in dst_order
+        if pk in by_pk
+    ]
+
+
 def expand_article(article_pk: int) -> list[dict]:
     """조문 그래프 확장 — 위임(DELEGATES)/인용(CITES)/확인법령(DETAILED_IN).
 
