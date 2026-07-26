@@ -94,7 +94,12 @@ def _fmt_article_no(article_no: int) -> str:
 
 
 _HIER_RANK = {"법률": 0, "시행령": 1, "시행규칙": 2}
-_HIER_COLOR = {"법률": "#2563eb", "시행령": "#059669", "시행규칙": "#d97706"}
+# 위계 배지 (bg, fg) — Toss 팔레트: fill primary / weak / surface
+_HIER_COLOR = {
+    "법률": ("#3182f6", "#ffffff"),
+    "시행령": ("#e8f3ff", "#1b64da"),
+    "시행규칙": ("#f2f4f6", "#4e5968"),
+}
 
 
 def _law_info() -> dict[str, tuple[str, str]]:
@@ -128,15 +133,15 @@ def _node_html(law_id: str, art_no: int, title: str, body: str | None,
     import html as H
 
     law_name, hier = info.get(law_id, (law_id, "법률"))
-    color = _HIER_COLOR.get(hier, "#6b7280")
-    head = (f'<span class="badge" style="background:{color}">{H.escape(hier)}</span> '
+    bg, fg = _HIER_COLOR.get(hier, ("#f2f4f6", "#4e5968"))
+    head = (f'<span class="badge" style="background:{bg};color:{fg}">{H.escape(hier)}</span>'
             f'<b>{H.escape(law_name)} {_fmt_article_no(art_no)}</b>'
-            f'<span class="title">({H.escape(title or "")})</span>')
+            f'<span class="title">{H.escape(title or "")}</span>')
     if body:
-        return (f'<div class="card" style="border-left-color:{color}">'
+        return (f'<div class="card">'
                 f'<details{" open" if open_body else ""}><summary>{head}</summary>'
                 f'<pre>{H.escape(body)}</pre></details></div>')
-    return f'<div class="card" style="border-left-color:{color}">{head}</div>'
+    return f'<div class="card">{head}</div>'
 
 
 def do_lookup(args: list[str]) -> None:
@@ -202,36 +207,47 @@ def do_lookup(args: list[str]) -> None:
     page = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <title>{H.escape(law_name)} {_fmt_article_no(art_no)}</title>
 <style>
-  body {{ font-family: 'Malgun Gothic', sans-serif; max-width: 960px; margin: 2rem auto;
-         padding: 0 1rem; color: #1f2937; line-height: 1.7; }}
-  h1 {{ font-size: 1.4rem; margin-bottom: .2rem; }}
-  .meta {{ color: #6b7280; margin-bottom: 1rem; }}
-  .badge {{ color: #fff; border-radius: 4px; padding: 1px 8px; font-size: .78rem; margin-right: 6px; }}
-  .title {{ color: #6b7280; margin-left: 6px; }}
-  .card {{ border: 1px solid #e5e7eb; border-left: 4px solid #999; border-radius: 8px;
-           padding: .55rem .9rem; margin: .45rem 0; background: #fff; }}
-  pre {{ white-space: pre-wrap; font-family: inherit; font-size: .92rem; color: #374151;
-         margin: .6rem 0 0; padding-top: .6rem; border-top: 1px dashed #e5e7eb; }}
-  summary {{ cursor: pointer; }}  summary::marker {{ color: #9ca3af; }}
-  ul {{ list-style: none; padding-left: 1.6rem; position: relative; }}
+  /* Toss(TDS) 토큰: canvas #ffffff, foreground #191f28, body #4e5968, muted #8b95a1,
+     surface #f2f4f6, border #e5e8eb, primary #3182f6, weak #e8f3ff/#1b64da.
+     그림자 토큰 없음 → 플랫 색 레이어링. 간격 4/6/8/16/24/32, 라운드 8~16. */
+  body {{ font-family: 'Toss Product Sans', Pretendard, -apple-system, 'Malgun Gothic',
+          sans-serif; max-width: 960px; margin: 32px auto; padding: 0 24px;
+          background: #ffffff; color: #4e5968; font-size: 16px; line-height: 24px; }}
+  h1 {{ color: #191f28; font-size: 30px; font-weight: 600; line-height: 45px;
+        margin: 0 0 4px; }}
+  .meta {{ color: #8b95a1; font-size: 14px; line-height: 21px; margin-bottom: 24px; }}
+  h2 {{ color: #191f28; font-size: 22px; font-weight: 600; line-height: 33px;
+        margin: 32px 0 8px; }}
+  .count {{ color: #8b95a1; font-weight: 400; font-size: 14px; margin-left: 6px; }}
+  .badge {{ display: inline-block; border-radius: 6px; padding: 2px 8px;
+            font-size: 13px; font-weight: 600; line-height: 20px; margin-right: 8px; }}
+  .title {{ color: #8b95a1; margin-left: 8px; font-weight: 400; }}
+  b {{ color: #191f28; font-weight: 600; }}
+  .card {{ border: 1px solid #e5e8eb; border-radius: 16px; background: #ffffff;
+           padding: 12px 20px; margin: 8px 0; }}
+  section.root > .card {{ background: #f2f4f6; border-color: #f2f4f6; }}
+  pre {{ white-space: pre-wrap; font-family: inherit; font-size: 16px; line-height: 24px;
+         color: #4e5968; margin: 12px 0 4px; padding-top: 12px;
+         border-top: 1px solid #e5e8eb; }}
+  summary {{ cursor: pointer; }}  summary::marker {{ color: #3182f6; }}
+  summary:hover b {{ color: #3182f6; }}
+  ul {{ list-style: none; padding-left: 28px; position: relative; margin: 0; }}
   ul li {{ position: relative; }}
-  ul li::before {{ content: ""; position: absolute; left: -1rem; top: 1.4rem;
-                   width: .8rem; border-top: 2px solid #cbd5e1; }}
-  ul li::after {{ content: ""; position: absolute; left: -1rem; top: 0; bottom: 0;
-                  border-left: 2px solid #cbd5e1; }}
-  ul li:last-child::after {{ height: 1.4rem; bottom: auto; }}
-  h2 {{ font-size: 1.05rem; margin-top: 1.6rem; border-bottom: 2px solid #e5e7eb;
-        padding-bottom: .3rem; }}
-  .chip {{ display: inline-block; background: #f3f4f6; border: 1px solid #e5e7eb;
-           border-radius: 999px; padding: 2px 12px; margin: 3px; font-size: .85rem; }}
-  section.root > .card {{ box-shadow: 0 1px 4px rgba(0,0,0,.08); }}
+  ul li::before {{ content: ""; position: absolute; left: -16px; top: 26px;
+                   width: 12px; border-top: 2px solid #e5e8eb; }}
+  ul li::after {{ content: ""; position: absolute; left: -16px; top: 0; bottom: 0;
+                  border-left: 2px solid #e5e8eb; }}
+  ul li:last-child::after {{ height: 26px; bottom: auto; }}
+  .chip {{ display: inline-block; background: #f2f4f6; color: #4e5968;
+           border-radius: 999px; padding: 4px 16px; margin: 4px 6px 4px 0;
+           font-size: 14px; line-height: 21px; }}
 </style></head><body>
-<h1>{H.escape(law_name)} {_fmt_article_no(art_no)} ({H.escape(row["title"] or "")})</h1>
-<div class="meta">시행 {row["valid_from"]} ~ {until} · 현행 여부: {"현행" if row["is_current"] else "이력"}</div>
+<h1>{H.escape(law_name)} {_fmt_article_no(art_no)}</h1>
+<div class="meta">{H.escape(row["title"] or "")} · 시행 {row["valid_from"]} ~ {until}{"" if row["is_current"] else " · 이력 버전"}</div>
 <section class="root">{_node_html(law_id, art_no, row["title"], _clean_body(row["content"], art_no), info, open_body=True)}</section>
-<h2>위임 체인 (DELEGATES) — {len(hop1)}건{" · 카드를 클릭하면 조문 본문" if hop1 else ""}</h2>
-{f'<ul style="padding-left:.2rem">{chain_html}</ul>' if hop1 else '<p class="meta">위임 관계 없음</p>'}
-<h2>인용 (CITES) — {len(cites)}건</h2>
+<h2>위임 체인<span class="count">{len(hop1)}건{" · 카드를 누르면 조문 본문" if hop1 else ""}</span></h2>
+{f'<ul style="padding-left:4px">{chain_html}</ul>' if hop1 else '<p class="meta">위임 관계 없음</p>'}
+<h2>인용<span class="count">{len(cites)}건</span></h2>
 {cites_html or '<p class="meta">인용 관계 없음</p>'}
 </body></html>"""
 
