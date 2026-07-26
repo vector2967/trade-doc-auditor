@@ -23,32 +23,14 @@ from pathlib import Path
 import anthropic
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 GOLDSET = ROOT / "law_repository" / "data" / "goldset.json"
 OUT = ROOT / "agent" / "data" / "query_rewrites.json"
 MODEL = os.environ.get("QUERY_REWRITE_MODEL", "claude-opus-4-8")
 
-SYSTEM = """\
-너는 한국 관세·무역 법령 검색 시스템의 쿼리 재작성기다. 일상어 질문을 받아,
-법령 조문(관세법·시행령·시행규칙, FTA관세특례법, 관세환급특례법, 대외무역법,
-식물방역법, 수입식품안전관리 특별법, 약사법, 화장품법, 전기용품법 등)에 실제로
-등장하는 법률 용어로 표현한 검색 쿼리 변형을 만든다.
-
-규칙:
-- 변형은 최대 3개. 각각 질문의 핵심 의도를 법률 용어로 바꾼 짧은 검색어구.
-- 유사 제도를 혼동하지 말 것 (재수입면세≠재수출면세, 잠정가격신고≠가격신고,
-  경정≠환급, 수정신고≠경정청구 등) — 질문이 어느 쪽인지 분명할 때만 그 용어 사용.
-- 수입 가능 여부·요건·필요서류 질문이면 "관세법 제226조 세관장확인" 앵커 변형을 포함.
-- 답을 추측해 특정 조문 번호를 넣지 말 것 (제226조 앵커만 예외).
-- 출력은 반드시 JSON 배열 하나만: ["변형1", "변형2", ...]  다른 텍스트 금지."""
-
-
-def _parse_variants(text: str) -> list[str]:
-    """응답에서 JSON 배열 추출 (호환 모델이 코드펜스/부연을 붙여도 방어)."""
-    m = re.search(r"\[.*\]", text, re.DOTALL)
-    if not m:
-        raise ValueError(f"JSON 배열 미발견: {text[:200]}")
-    variants = json.loads(m.group())
-    return [v.strip() for v in variants if isinstance(v, str) and v.strip()][:3]
+# 프롬프트·파서는 실시간 재작성(query_rewrite)과 공유 — 캐시/실시간 품질 동일 보장
+from agent.query_rewrite import LLM_SYSTEM as SYSTEM  # noqa: E402
+from agent.query_rewrite import parse_llm_variants as _parse_variants  # noqa: E402
 
 
 def main() -> int:

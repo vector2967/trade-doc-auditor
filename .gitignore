@@ -43,3 +43,6 @@ law_repository/deploy/.env.cloud
 
 # 시연 CLI(:조회) HTML 출력물 — 로컬 전용
 demo_out/
+
+# 실시간 LLM 재작성 런타임 캐시 — 로컬 전용
+agent/data/query_rewrites_runtime.json

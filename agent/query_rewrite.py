@@ -3,7 +3,10 @@
 우선순위:
 1. LLM 재작성 캐시 (agent/data/query_rewrites.json) — scripts/generate_rewrites.py 로
    생성·커밋. API 키 없이도(로컬·Actions) 캐시만으로 동작한다.
-2. 규칙 기반 레키콘 — 일상어→법률용어 매핑 + 요건성 질문의 관세법 226조 앵커 라우팅.
+2. 실시간 LLM 재작성 — 캐시 미스 + ANTHROPIC_API_KEY 존재 시에만. 결과는
+   런타임 캐시(query_rewrites_runtime.json, gitignore)에 저장해 같은 질문 재호출 방지.
+   키 없음·타임아웃·파싱 실패는 조용히 3번으로 폴백 — 시연이 LLM 장애에 안 죽는다.
+3. 규칙 기반 레키콘 — 일상어→법률용어 매핑 + 요건성 질문의 관세법 226조 앵커 라우팅.
    골드셋 오염 방지: 문항별 하드코딩 금지, 도메인 일반 규칙만 둘 것.
 
 반환된 변형 쿼리들은 retrieval.search(rewrite=True) 에서 arm 별로 검색된 뒤
@@ -12,11 +15,38 @@ RRF 로 원 쿼리 결과와 융합된다(원 쿼리 가중 우선).
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 
 _CACHE_PATH = Path(__file__).resolve().parent / "data" / "query_rewrites.json"
+_RUNTIME_PATH = Path(__file__).resolve().parent / "data" / "query_rewrites_runtime.json"
 _cache: dict[str, list[str]] | None = None
+_runtime: dict[str, list[str]] | None = None
+
+# 실시간 재작성용 프롬프트 — generate_rewrites.py(캐시 생성)와 공유
+LLM_SYSTEM = """\
+너는 한국 관세·무역 법령 검색 시스템의 쿼리 재작성기다. 일상어 질문을 받아,
+법령 조문(관세법·시행령·시행규칙, FTA관세특례법, 관세환급특례법, 대외무역법,
+식물방역법, 수입식품안전관리 특별법, 약사법, 화장품법, 전기용품법 등)에 실제로
+등장하는 법률 용어로 표현한 검색 쿼리 변형을 만든다.
+
+규칙:
+- 변형은 최대 3개. 각각 질문의 핵심 의도를 법률 용어로 바꾼 짧은 검색어구.
+- 유사 제도를 혼동하지 말 것 (재수입면세≠재수출면세, 잠정가격신고≠가격신고,
+  경정≠환급, 수정신고≠경정청구 등) — 질문이 어느 쪽인지 분명할 때만 그 용어 사용.
+- 수입 가능 여부·요건·필요서류 질문이면 "관세법 제226조 세관장확인" 앵커 변형을 포함.
+- 답을 추측해 특정 조문 번호를 넣지 말 것 (제226조 앵커만 예외).
+- 출력은 반드시 JSON 배열 하나만: ["변형1", "변형2", ...]  다른 텍스트 금지."""
+
+
+def parse_llm_variants(text: str) -> list[str]:
+    """응답에서 JSON 배열 추출 (호환 모델이 코드펜스/부연을 붙여도 방어)."""
+    m = re.search(r"\[.*\]", text, re.DOTALL)
+    if not m:
+        raise ValueError(f"JSON 배열 미발견: {text[:200]}")
+    variants = json.loads(m.group())
+    return [v.strip() for v in variants if isinstance(v, str) and v.strip()][:3]
 
 MAX_VARIANTS = 3   # 백엔드(캐시/레키콘) 각각의 상한
 MAX_TOTAL = 4      # 병합 후 총 변형 상한 (변형당 arm 2회 검색 비용)
@@ -67,6 +97,56 @@ def _load_cache() -> dict[str, list[str]]:
     return _cache
 
 
+def _load_runtime() -> dict[str, list[str]]:
+    global _runtime
+    if _runtime is None:
+        _runtime = (
+            json.loads(_RUNTIME_PATH.read_text(encoding="utf-8"))
+            if _RUNTIME_PATH.exists() else {}
+        )
+    return _runtime
+
+
+def _llm_variants_live(query: str) -> list[str] | None:
+    """캐시 미스 시 실시간 LLM 재작성. 키 없음/실패 → None (레키콘만 사용).
+
+    실패한 질문도 런타임 캐시에 [] 로 남겨 같은 세션·다음 세션에서 재호출하지
+    않는다(시연 중 같은 질문을 다시 칠 때 지연 반복 방지).
+    """
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return None
+    runtime = _load_runtime()
+    if query in runtime:
+        return runtime[query] or None
+    variants: list[str] = []
+    try:
+        import anthropic
+
+        # 재시도 0 — 재작성은 best-effort: 실패하면 레키콘 폴백이 기다리고 있고,
+        # 시연 중 응답 지연(타임아웃×재시도)이 실패 자체보다 나쁘다.
+        client = anthropic.Anthropic(
+            timeout=float(os.environ.get("QUERY_REWRITE_TIMEOUT", "10")),
+            max_retries=0)
+        response = client.messages.create(
+            model=os.environ.get("QUERY_REWRITE_MODEL", "claude-haiku-4-5-20251001"),
+            max_tokens=512,
+            system=LLM_SYSTEM,
+            messages=[{"role": "user", "content": query}],
+        )
+        text = "".join(b.text for b in response.content if b.type == "text")
+        variants = parse_llm_variants(text)
+    except Exception:  # noqa: BLE001 — 어떤 장애도 검색 자체를 막으면 안 됨
+        pass
+    runtime[query] = variants
+    try:
+        _RUNTIME_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _RUNTIME_PATH.write_text(
+            json.dumps(runtime, ensure_ascii=False, indent=1), encoding="utf-8")
+    except OSError:
+        pass
+    return variants or None
+
+
 def _lexicon_variants(query: str) -> list[tuple[str, bool]]:
     """(변형, 앵커 여부). 앵커 = 원 문장 없이 법률 용어만으로 만든 독립 쿼리."""
     out: list[tuple[str, bool]] = []
@@ -90,9 +170,10 @@ def rewrite_tagged(query: str) -> list[tuple[str, bool]]:
     앵커 가중 실측(2026-07-26): 일상어("직구")가 법률 용어와 안 겹치는 질문은
     변형 0.6 가중으론 융합 중위권에 그침 — 앵커만 1.0 으로 승격.
     """
-    out: list[tuple[str, bool]] = [
-        (v, False) for v in _load_cache().get(query, [])[:MAX_VARIANTS]
-    ]
+    llm = _load_cache().get(query)
+    if llm is None:
+        llm = _llm_variants_live(query) or []
+    out: list[tuple[str, bool]] = [(v, False) for v in llm[:MAX_VARIANTS]]
     seen = {v for v, _ in out}
     # 앵커 먼저 — MAX_TOTAL 상한에 걸릴 때 덧붙임 변형이 앵커를 밀어내지 않게
     # (실측: #8 에서 범용 덧붙임이 앵커를 밀어내 규칙45 가 top5 이탈)
